@@ -1,5 +1,6 @@
 // Iconos de trazo (24×24) para el menú lateral
 const TRAZOS = {
+  carrito: ['M3 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L21 7H6', 'M9.5 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', 'M17.5 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z'],
   resumen: ['M3 13h8V3H3z', 'M13 21h8V11h-8z', 'M3 21h8v-6H3z', 'M13 9h8V3h-8z'],
   ordenes: ['M6 2h9l5 5v15H6z', 'M14 2v6h6', 'M9 13h7', 'M9 17h5'],
   requisiciones: ['M9 4h6v3H9z', 'M7 5H5v16h14V5h-2', 'm9 13 2 2 4-4'],

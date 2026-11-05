@@ -2,7 +2,7 @@
 
 Sistema para centralizar el ciclo de compras de una empresa: requisiciones, cotizaciones, órdenes de compra, recepción en bodegas, facturas de proveedor y pagos, con control del gasto por departamento.
 
-**15 CRUDs completos · 16 tablas · 76 endpoints REST · 16 pantallas en React.**
+**15 CRUDs completos · 17 tablas · 79 endpoints REST · autenticación con JWT · 18 pantallas en React.**
 
 - **API REST** en Node.js + Express, con MySQL y Sequelize.
 - **Aplicación web** en React + Vite que consume la API.
@@ -80,6 +80,17 @@ Sistema para centralizar el ciclo de compras de una empresa: requisiciones, coti
 └── postman/                Colección de pruebas
 ```
 
+## Autenticación (día 2)
+
+- Todas las rutas de los CRUDs exigen `Authorization: Bearer <token>`; sin token válido responden **401 `{ "error": "No autorizado" }`**.
+- `POST /api/auth/register` (201, o 400 si el correo existe), `POST /api/auth/login` (200 con `{ token, usuario }`, o 401) y `GET /api/auth/me`.
+- Contraseñas cifradas con bcrypt; token JWT HS256 que vence en `JWT_EXPIRES_IN` (8 h).
+- Configura `JWT_SECRET` (mínimo 32 caracteres) y `JWT_EXPIRES_IN` en `backend/.env`; ver `backend/.env.example`.
+- El seed crea un usuario de prueba; su correo y contraseña están en `backend/src/seeders/seed.js`.
+- Informe de la investigación: [docs/informe-token.md](docs/informe-token.md) (también en [PDF](docs/Informe_Token_JWT.pdf)).
+
+![Pantalla de inicio de sesión](docs/evidencias/pantalla-login.png)
+
 ## Puesta en marcha
 
 ### 1. Crear la base de datos
@@ -108,6 +119,8 @@ Edita `backend/.env` con tus datos:
 | `DB_NAME` | Nombre de la base de datos | `ordenes_compra` |
 | `DB_USER` | Usuario MySQL | `root` |
 | `DB_PASSWORD` | Contraseña MySQL | |
+| `JWT_SECRET` | Clave para firmar los tokens (mínimo 32 caracteres aleatorios). Genérala con `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` | |
+| `JWT_EXPIRES_IN` | Duración del token | `8h` |
 
 ### 3. Instalar dependencias y cargar datos de ejemplo
 
@@ -116,7 +129,7 @@ npm install
 npm run seed
 ```
 
-El seed **recrea las 16 tablas** y carga datos de ejemplo en todas: departamentos, empleados, proveedores con sus contactos, categorías, productos, requisiciones, cotizaciones, 3 órdenes de compra (una pendiente, una aprobada y una recibida), bodegas, existencias, recepciones, facturas, pagos y métodos de pago. No lo ejecutes sobre una base con datos que quieras conservar.
+El seed **recrea las 17 tablas** y carga datos de ejemplo en todas: departamentos, empleados, proveedores con sus contactos, categorías, productos, requisiciones, cotizaciones, 3 órdenes de compra (una pendiente, una aprobada y una recibida), bodegas, existencias, recepciones, facturas, pagos, métodos de pago y un usuario de prueba para iniciar sesión (correo y contraseña en `backend/src/seeders/seed.js`). Las cuentas que hayas creado con "Crear una cuenta" se conservan al volver a ejecutar el seed. No lo ejecutes sobre una base con datos que quieras conservar.
 
 ### 4. Levantar la API
 
@@ -167,7 +180,7 @@ Todas las rutas cuelgan de `/api` y responden JSON. Cada recurso tiene las cinco
 | `pagos` | `factura_id*`, `metodo_pago_id*`, `fecha*`, `monto*`, `referencia` | `factura_id`, `metodo_pago_id` |
 | `metodos-pago` | `nombre*` (único), `descripcion`, `activo` | — |
 
-Las fechas van en formato `AAAA-MM-DD`. Las respuestas incluyen los datos básicos de los registros relacionados (por ejemplo, un empleado trae su `departamento`). `GET /api/ordenes/:id` incluye las líneas con su producto. Además de los 75 endpoints de los CRUDs, `GET /api` indica si el servicio está activo.
+Las fechas van en formato `AAAA-MM-DD`. Las respuestas incluyen los datos básicos de los registros relacionados (por ejemplo, un empleado trae su `departamento`). `GET /api/ordenes/:id` incluye las líneas con su producto. Además de los 75 endpoints de los CRUDs (todos requieren token), están los 3 de autenticación y `GET /api`, público, que indica si el servicio está activo.
 
 Ejemplo para crear una orden:
 
@@ -210,7 +223,7 @@ Todas las respuestas de error tienen la misma forma:
 
 ## Pruebas
 
-La colección `postman/ordenes-compra.postman_collection.json` cubre los 15 CRUDs, las reglas de negocio y los casos de error. Las pruebas crean sus propios registros y los eliminan al final, así que se pueden repetir. Con la API levantada y el seed recién cargado:
+La colección `postman/ordenes-compra.postman_collection.json` cubre la autenticación (registro, login, perfil y los casos 401), los 15 CRUDs, las reglas de negocio y los casos de error. La carpeta **Autenticación** va primero: registra un usuario nuevo, inicia sesión y guarda el token, que el resto de la colección usa automáticamente. Las pruebas crean sus propios registros y los eliminan al final, así que se pueden repetir. Con la API levantada y el seed recién cargado:
 
 ```bash
 postman collection run postman/ordenes-compra.postman_collection.json
@@ -218,7 +231,7 @@ postman collection run postman/ordenes-compra.postman_collection.json
 
 También puede importarse en la aplicación de Postman. La variable `baseUrl` apunta a `http://localhost:3000/api`.
 
-Resultado de la última ejecución (171 peticiones, 404 aserciones, 0 fallos):
+Resultado de la última ejecución (186 peticiones, 440 aserciones, 0 fallos):
 
 ![Resultado de las pruebas con Postman CLI](docs/evidencias/pruebas-postman.png)
 
@@ -239,4 +252,5 @@ La salida completa en texto está en [`docs/evidencias/pruebas-postman.txt`](doc
 - [Justificación del sistema](docs/justificacion.md)
 - [Diagrama entidad-relación](docs/diagrama-er.md)
 - [Justificación y modelo de datos (PDF)](docs/Ordenes_de_Compra_Justificacion_y_Modelo.pdf)
+- [Informe de investigación sobre el token JWT](docs/informe-token.md) ([PDF](docs/Informe_Token_JWT.pdf))
 - [Evidencia de pruebas con Postman](docs/evidencias/pruebas-postman.png)

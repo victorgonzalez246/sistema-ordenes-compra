@@ -1,6 +1,8 @@
 # Diagrama entidad-relación
 
-El sistema tiene **16 tablas**: 15 con CRUD propio y `DETALLES_ORDEN`, que se gestiona junto con su orden de compra.
+El sistema tiene **17 tablas**: 15 con CRUD propio, `DETALLES_ORDEN` (se gestiona junto con su orden de compra) y `USUARIOS`, que guarda las cuentas para iniciar sesión.
+
+`USUARIOS` no se relaciona con las demás tablas: el día 2 solo exige distinguir entre usuario autenticado y no autenticado, sin roles ni registro de quién creó cada dato.
 
 ```mermaid
 erDiagram
@@ -168,9 +170,17 @@ erDiagram
         VARCHAR(255) descripcion
         BOOLEAN activo "DEFAULT true"
     }
+
+    USUARIOS {
+        INT id PK
+        VARCHAR(100) nombre "NOT NULL"
+        VARCHAR(120) correo UK "NOT NULL, formato email"
+        VARCHAR(72) password "hash bcrypt, nunca se devuelve"
+        DATETIME fecha_creacion "automática"
+    }
 ```
 
-Todas las tablas incluyen además `created_at` y `updated_at`.
+Todas las tablas incluyen además `created_at` y `updated_at` (en `USUARIOS`, `created_at` se llama `fecha_creacion`).
 
 ## Reglas de las relaciones
 

@@ -17,7 +17,17 @@ const {
   Recepcion,
   Factura,
   Pago,
+  Usuario,
 } = require('../models');
+const bcrypt = require('bcryptjs');
+const { BCRYPT_RONDAS } = require('../config/auth');
+
+// Cuenta de prueba para entrar al sistema en desarrollo (no usar en producción)
+const USUARIO_DEMO = {
+  nombre: 'Administrador de Compras',
+  correo: 'admin@empresa.co.cr',
+  password: 'Compras2026!',
+};
 
 const categorias = [
   { nombre: 'Papelería y oficina', descripcion: 'Papel, artículos de escritorio y consumibles' },
@@ -141,8 +151,27 @@ const ordenes = [
 async function sembrar() {
   try {
     await sequelize.authenticate();
+
+    // Las cuentas creadas por los usuarios se conservan: se respaldan antes de recrear las tablas
+    let cuentas = [];
+    try {
+      cuentas = await Usuario.scope('conPassword').findAll({ raw: true });
+    } catch {
+      // La tabla todavía no existe (primera vez que se ejecuta el seed)
+    }
+
     // Recrea las tablas para partir de datos limpios
     await sequelize.sync({ force: true });
+
+    // No se conservan la cuenta de prueba (se vuelve a crear) ni las que genera la colección de Postman
+    const conservadas = cuentas.filter(
+      (c) => c.correo !== USUARIO_DEMO.correo && !/^prueba\.\d+@empresa\.co\.cr$/.test(c.correo)
+    );
+    if (conservadas.length) {
+      await Usuario.bulkCreate(
+        conservadas.map(({ nombre, correo, password, fecha_creacion }) => ({ nombre, correo, password, fecha_creacion }))
+      );
+    }
 
     const deps = await Departamento.bulkCreate(departamentos, { validate: true });
     const provs = await Proveedor.bulkCreate(proveedores, { validate: true });
@@ -236,10 +265,18 @@ async function sembrar() {
       { validate: true }
     );
 
+    await Usuario.create({
+      nombre: USUARIO_DEMO.nombre,
+      correo: USUARIO_DEMO.correo,
+      password: await bcrypt.hash(USUARIO_DEMO.password, BCRYPT_RONDAS),
+    });
+
     console.log(
       `Datos cargados: ${departamentos.length} departamentos, ${proveedores.length} proveedores, ` +
         `${productos.length} productos, ${ordenes.length} órdenes de compra y datos de las 11 tablas restantes`
     );
+    console.log(`Usuario de prueba: ${USUARIO_DEMO.correo} (contraseña en src/seeders/seed.js)`);
+    if (conservadas.length) console.log(`Se conservaron ${conservadas.length} cuenta(s) existente(s)`);
   } catch (error) {
     console.error('Error al cargar los datos de ejemplo:', error.message);
     process.exitCode = 1;

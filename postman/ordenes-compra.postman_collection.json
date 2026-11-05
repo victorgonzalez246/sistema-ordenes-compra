@@ -128,9 +128,698 @@
     {
       "key": "pago2Id",
       "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "usuarioCorreo",
+      "value": ""
+    },
+    {
+      "key": "usuarioPassword",
+      "value": ""
     }
   ],
   "item": [
+    {
+      "name": "Autenticación",
+      "description": "Registro, inicio de sesión y perfil. El login guarda el token que usan todas las demás peticiones.",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario de Pruebas\",\n  \"correo\": \"{{usuarioCorreo}}\",\n  \"password\": \"{{usuarioPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"usuarioCorreo\", \"prueba.\" + Date.now() + \"@empresa.co.cr\");",
+                  "pm.collectionVariables.set(\"usuarioPassword\", \"Prueba-\" + Math.random().toString(36).slice(2, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"La respuesta no incluye la contraseña\", () => {",
+                  "    const u = pm.response.json().usuario || pm.response.json();",
+                  "    pm.expect(u).to.not.have.property(\"password\");",
+                  "});",
+                  "pm.test(\"Devuelve el usuario creado con su fecha de creación\", () => {",
+                  "    const u = pm.response.json();",
+                  "    pm.expect(u.id).to.be.a(\"number\");",
+                  "    pm.expect(u.correo).to.eql(pm.collectionVariables.get(\"usuarioCorreo\"));",
+                  "    pm.expect(u).to.have.property(\"fecha_creacion\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar con correo repetido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Otro usuario\",\n  \"correo\": \"{{usuarioCorreo}}\",\n  \"password\": \"OtraClave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Indica que el correo ya existe\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.error).to.match(/correo/);",
+                  "    pm.expect(r.detalles.map((d) => d.campo)).to.include(\"correo\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar con datos inválidos (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"correo\": \"no-es-un-correo\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Señala nombre, correo y contraseña\", () => {",
+                  "    const campos = pm.response.json().detalles.map((d) => d.campo);",
+                  "    pm.expect(campos).to.include.members([\"nombre\", \"correo\", \"password\"]);",
+                  "});",
+                  "pm.test(\"Explica el mínimo de 8 caracteres\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"password\");",
+                  "    pm.expect(d.mensaje).to.match(/8 caracteres/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login con contraseña incorrecta (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{usuarioCorreo}}\",\n  \"password\": \"ClaveEquivocada1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Mensaje genérico de credenciales\", () => pm.expect(pm.response.json().error).to.eql(\"Correo o contraseña incorrectos\"));",
+                  "pm.test(\"No entrega token\", () => pm.expect(pm.response.json()).to.not.have.property(\"token\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login con correo inexistente (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Responde lo mismo que con la contraseña incorrecta para no revelar qué correos tienen cuenta.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"nadie@empresa.co.cr\",\n  \"password\": \"Cualquiera123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Mismo mensaje que con contraseña incorrecta\", () => pm.expect(pm.response.json().error).to.eql(\"Correo o contraseña incorrectos\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Iniciar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{usuarioCorreo}}\",\n  \"password\": \"{{usuarioPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"La respuesta no incluye la contraseña\", () => {",
+                  "    const u = pm.response.json().usuario || pm.response.json();",
+                  "    pm.expect(u).to.not.have.property(\"password\");",
+                  "});",
+                  "pm.test(\"Devuelve { token, usuario } y guarda el token\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.token).to.be.a(\"string\");",
+                  "    pm.expect(r.token.split(\".\")).to.have.lengthOf(3);",
+                  "    pm.expect(r.usuario.correo).to.eql(pm.collectionVariables.get(\"usuarioCorreo\"));",
+                  "    pm.collectionVariables.set(\"token\", r.token);",
+                  "});",
+                  "pm.test(\"El token vence y su payload no lleva datos sensibles\", () => {",
+                  "    const payload = JSON.parse(atob(pm.response.json().token.split(\".\")[1].replace(/-/g, \"+\").replace(/_/g, \"/\")));",
+                  "    pm.expect(payload.exp).to.be.above(payload.iat);",
+                  "    pm.expect(payload).to.not.have.property(\"password\");",
+                  "    pm.expect(payload).to.not.have.property(\"correo\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil actual",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"La respuesta no incluye la contraseña\", () => {",
+                  "    const u = pm.response.json().usuario || pm.response.json();",
+                  "    pm.expect(u).to.not.have.property(\"password\");",
+                  "});",
+                  "pm.test(\"Es el usuario del token\", () => pm.expect(pm.response.json().correo).to.eql(pm.collectionVariables.get(\"usuarioCorreo\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil sin token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Responde { error: \\\"No autorizado\\\" }\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    pm.expect(pm.response.json().error).to.eql(\"No autorizado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil con token inválido (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "esto.no.es-un-token",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Responde { error: \\\"No autorizado\\\" }\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    pm.expect(pm.response.json().error).to.eql(\"No autorizado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil con token alterado (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Cambia el payload del token válido sin volver a firmarlo: la firma ya no coincide.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const [h, p, firma] = pm.collectionVariables.get(\"token\").split(\".\");",
+                  "const payload = JSON.parse(atob(p.replace(/-/g, \"+\").replace(/_/g, \"/\")));",
+                  "payload.sub = \"999999\";",
+                  "const nuevo = btoa(JSON.stringify(payload)).replace(/=+$/, \"\").replace(/\\+/g, \"-\").replace(/\\//g, \"_\");",
+                  "pm.request.headers.upsert({ key: \"Authorization\", value: \"Bearer \" + h + \".\" + nuevo + \".\" + firma });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Responde { error: \\\"No autorizado\\\" }\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    pm.expect(pm.response.json().error).to.eql(\"No autorizado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Encabezado sin \"Bearer\" (401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Responde { error: \\\"No autorizado\\\" }\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    pm.expect(pm.response.json().error).to.eql(\"No autorizado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar proveedores sin token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedores"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Responde { error: \\\"No autorizado\\\" }\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    pm.expect(pm.response.json().error).to.eql(\"No autorizado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear categoría sin token (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"No debería crearse\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Responde { error: \\\"No autorizado\\\" }\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    pm.expect(pm.response.json().error).to.eql(\"No autorizado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar orden sin token (401)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "1"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Responde { error: \\\"No autorizado\\\" }\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    pm.expect(pm.response.json().error).to.eql(\"No autorizado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Estado del servicio sin token (público)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Servicio activo\", () => pm.expect(pm.response.json().estado).to.eql(\"ok\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
     {
       "name": "Proveedores",
       "item": [
@@ -7515,5 +8204,15 @@
       ]
     }
   ],
-  "description": "Pruebas de la API de Órdenes de Compra: CRUD de departamentos, proveedores, productos y órdenes, con sus reglas de negocio y respuestas de error. Ejecutar con la base recién cargada con npm run seed."
+  "description": "Pruebas de la API de Órdenes de Compra: CRUD de departamentos, proveedores, productos y órdenes, con sus reglas de negocio y respuestas de error. Ejecutar con la base recién cargada con npm run seed.",
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  }
 }

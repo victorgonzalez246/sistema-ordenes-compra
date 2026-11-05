@@ -10,12 +10,30 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiFetch(ruta, { method = 'GET', body } = {}) {
+// AuthContext registra aquí cómo leer el token y qué hacer si la API responde 401
+let leerToken = () => null;
+let alNoAutorizado = () => {};
+
+export function configurarAutenticacion({ token, noAutorizado }) {
+  leerToken = token;
+  alNoAutorizado = noAutorizado;
+}
+
+/**
+ * Llamada común a la API. Agrega "Authorization: Bearer <token>" a todas las peticiones,
+ * salvo las públicas (login y registro), donde un 401 significa credenciales incorrectas.
+ */
+export async function apiFetch(ruta, { method = 'GET', body, publica = false } = {}) {
+  const headers = {};
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  const token = leerToken();
+  if (token && !publica) headers.Authorization = `Bearer ${token}`;
+
   let respuesta;
   try {
     respuesta = await fetch(`${API_URL}${ruta}`, {
       method,
-      headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+      headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
@@ -25,6 +43,13 @@ export async function apiFetch(ruta, { method = 'GET', body } = {}) {
   if (respuesta.status === 204) return null;
 
   const datos = await respuesta.json().catch(() => null);
+
+  // Token vencido o inválido: se cierra la sesión y se vuelve al login
+  if (respuesta.status === 401 && !publica) {
+    alNoAutorizado();
+    throw new ApiError('Tu sesión venció. Inicia sesión de nuevo.', 401);
+  }
+
   if (!respuesta.ok) {
     throw new ApiError(datos?.error || `Error ${respuesta.status}`, respuesta.status, datos?.detalles || []);
   }

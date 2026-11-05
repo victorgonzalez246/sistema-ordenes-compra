@@ -16,6 +16,7 @@ const Requisicion = require('./Requisicion');
 const Recepcion = require('./Recepcion');
 const Factura = require('./Factura');
 const Pago = require('./Pago');
+const Usuario = require('./Usuario');
 
 /**
  * Relación 1:N entre dos modelos.
@@ -79,4 +80,5 @@ module.exports = {
   Recepcion,
   Factura,
   Pago,
+  Usuario,
 };

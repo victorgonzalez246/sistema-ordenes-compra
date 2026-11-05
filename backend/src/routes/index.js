@@ -1,11 +1,18 @@
 const { Router } = require('express');
+const autenticar = require('../middlewares/authMiddleware');
 
 const router = Router();
 
-// Estado del servicio
+// Estado del servicio (público)
 router.get('/', (req, res) => {
   res.json({ servicio: 'API de Órdenes de Compra', estado: 'ok' });
 });
+
+// Registro, login y perfil
+router.use('/auth', require('./authRoutes'));
+
+// Desde aquí, todas las rutas exigen un token válido (401 si no lo hay)
+router.use(autenticar);
 
 // Organización
 router.use('/departamentos', require('./departamentoRoutes'));

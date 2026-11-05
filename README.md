@@ -144,7 +144,15 @@ postman collection run postman/ordenes-compra.postman_collection.json
 
 También puede importarse en la aplicación de Postman. La variable `baseUrl` apunta a `http://localhost:3000/api`.
 
+Resultado de la última ejecución (13 peticiones, 31 aserciones, 0 fallos):
+
+![Resultado de las pruebas con Postman CLI](docs/evidencias/pruebas-postman.png)
+
+La salida completa en texto está en [`docs/evidencias/pruebas-postman.txt`](docs/evidencias/pruebas-postman.txt).
+
 ## Documentación
 
 - [Justificación del sistema](docs/justificacion.md)
 - [Diagrama entidad-relación](docs/diagrama-er.md)
+- [Justificación y modelo de datos (PDF)](docs/Ordenes_de_Compra_Justificacion_y_Modelo.pdf)
+- [Evidencia de pruebas con Postman](docs/evidencias/pruebas-postman.png)

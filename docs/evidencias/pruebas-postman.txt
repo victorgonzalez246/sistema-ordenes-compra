@@ -1,0 +1,111 @@
+
+Running your collection...
+postman
+
+Órdenes de Compra API
+
+Folder Proveedores
+Sub-folder Crear proveedor
+
+  POST http://localhost:3000/api/proveedores [201 Created, 547 B, 72 ms]
+  Pass  Status 201
+  Pass  Devuelve el proveedor creado
+
+Sub-folder Listar proveedores
+
+  GET http://localhost:3000/api/proveedores [200 OK, 1.48 KB, 9 ms]
+  Pass  Status 200
+  Pass  Devuelve un arreglo de proveedores
+  Pass  Incluye el proveedor recién creado
+
+Sub-folder Obtener proveedor por id
+
+  GET http://localhost:3000/api/proveedores/9 [200 OK, 542 B, 7 ms]
+  Pass  Status 200
+  Pass  Devuelve el proveedor solicitado
+
+Sub-folder Actualizar proveedor
+
+  PUT http://localhost:3000/api/proveedores/9 [200 OK, 544 B, 19 ms]
+  Pass  Status 200
+  Pass  Devuelve el proveedor con los cambios
+
+Folder Proveedores / Errores
+Sub-folder Crear sin campos obligatorios (400)
+
+  POST http://localhost:3000/api/proveedores [400 Bad Request, 595 B, 5 ms]
+  Pass  Status 400
+  Pass  Respuesta JSON con formato de error
+  Pass  Indica cada campo obligatorio faltante
+
+Sub-folder Crear con email inválido (400)
+
+  POST http://localhost:3000/api/proveedores [400 Bad Request, 450 B, 5 ms]
+  Pass  Status 400
+  Pass  Respuesta JSON con formato de error
+  Pass  Señala el campo email
+
+Sub-folder Crear con RIF duplicado (409)
+
+  POST http://localhost:3000/api/proveedores [409 Conflict, 430 B, 12 ms]
+  Pass  Status 409
+  Pass  Respuesta JSON con formato de error
+  Pass  El mensaje menciona el RIF
+
+Sub-folder Actualizar con RIF de otro proveedor (409)
+
+  PUT http://localhost:3000/api/proveedores/9 [409 Conflict, 430 B, 15 ms]
+  Pass  Status 409
+  Pass  Respuesta JSON con formato de error
+
+Sub-folder Obtener id inexistente (404)
+
+  GET http://localhost:3000/api/proveedores/999999 [404 Not Found, 370 B, 7 ms]
+  Pass  Status 404
+  Pass  Respuesta JSON con formato de error
+
+Sub-folder Obtener con id no numérico (400)
+
+  GET http://localhost:3000/api/proveedores/abc [400 Bad Request, 454 B, 5 ms]
+  Pass  Status 400
+  Pass  Respuesta JSON con formato de error
+  Pass  Señala el parámetro id
+
+Sub-folder Ruta inexistente (404)
+
+  GET http://localhost:3000/api/no-existe [404 Not Found, 372 B, 3 ms]
+  Pass  Status 404
+  Pass  Respuesta JSON con formato de error
+
+Folder Proveedores
+Sub-folder Eliminar proveedor
+
+  DELETE http://localhost:3000/api/proveedores/9 [204 No Content, 200 B, 12 ms]
+  Pass  Status 204
+  Pass  Sin cuerpo en la respuesta
+
+Sub-folder Obtener proveedor eliminado (404)
+
+  GET http://localhost:3000/api/proveedores/9 [404 Not Found, 365 B, 5 ms]
+  Pass  Status 404
+  Pass  Respuesta JSON con formato de error
+
+---------------------------------------------------------------------
+|                         |           executed |             failed |
+--------------------------+--------------------+---------------------
+|              iterations |                  1 |                  0 |
+--------------------------+--------------------+---------------------
+|                requests |                 13 |                  0 |
+--------------------------+--------------------+---------------------
+|            test-scripts |                 13 |                  0 |
+--------------------------+--------------------+---------------------
+|      prerequest-scripts |                  1 |                  0 |
+--------------------------+--------------------+---------------------
+|              assertions |                 31 |                  0 |
+---------------------------------------------------------------------
+| total run duration: 1103 ms                                       |
+---------------------------------------------------------------------
+| total data received: 2.86 KB (approx)                             |
+---------------------------------------------------------------------
+| average response time: 13 ms [min: 3 ms, max: 72 ms, s.d.: 17 ms] |
+---------------------------------------------------------------------

@@ -6,11 +6,12 @@ import { dinero } from '../utils/formato';
 const columnas = [
   { clave: 'codigo', titulo: 'Código', render: (p) => <code>{p.codigo}</code> },
   { clave: 'nombre', titulo: 'Producto', render: (p) => <strong>{p.nombre}</strong> },
+  { clave: 'categoria', titulo: 'Categoría', render: (p) => p.categoria?.nombre || '—' },
   { clave: 'unidad', titulo: 'Unidad' },
   { clave: 'precio_ref', titulo: 'Precio ref.', alinear: 'derecha', render: (p) => dinero(p.precio_ref) },
 ];
 
-const busqueda = ['codigo', 'nombre', 'unidad'];
+const busqueda = ['codigo', 'nombre', 'unidad', (p) => p.categoria?.nombre];
 
 export default function ProductosPage() {
   return (

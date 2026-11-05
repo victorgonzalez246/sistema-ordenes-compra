@@ -18,7 +18,12 @@ export default function PaginaCatalogo({
   Formulario,
   camposBusqueda,
   nombreDe,
+  femenino = false,
 }) {
+  // "Nuevo proveedor" / "Nueva factura", "creado" / "creada"
+  const nuevo = femenino ? 'Nueva' : 'Nuevo';
+  const terminacion = femenino ? 'a' : 'o';
+  const minuscula = singular.toLowerCase();
   const { datos, cargando, error, recargar } = useListado(api.listar);
   const [busqueda, setBusqueda] = useState('');
   const [editando, setEditando] = useState(null); // null: cerrado · {}: nuevo · registro: edición
@@ -28,16 +33,18 @@ export default function PaginaCatalogo({
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
     if (!q) return datos;
-    return datos.filter((fila) => camposBusqueda.some((c) => String(fila[c] ?? '').toLowerCase().includes(q)));
+    // Cada campo de búsqueda es una clave ("nombre") o una función (fila) => texto
+    const texto = (fila, c) => (typeof c === 'function' ? c(fila) : fila[c]);
+    return datos.filter((fila) => camposBusqueda.some((c) => String(texto(fila, c) ?? '').toLowerCase().includes(q)));
   }, [datos, busqueda, camposBusqueda]);
 
   async function guardar(valores) {
     if (editando.id) {
       await api.actualizar(editando.id, valores);
-      avisar(`${singular} actualizado`);
+      avisar(`${singular} actualizad${terminacion}`);
     } else {
       await api.crear(valores);
-      avisar(`${singular} creado`);
+      avisar(`${singular} cread${terminacion}`);
     }
     setEditando(null);
     recargar();
@@ -46,7 +53,7 @@ export default function PaginaCatalogo({
   async function eliminar() {
     try {
       await api.eliminar(eliminando.id);
-      avisar(`${singular} eliminado`);
+      avisar(`${singular} eliminad${terminacion}`);
       recargar();
     } catch (e) {
       avisar(e.message, 'error');
@@ -63,7 +70,7 @@ export default function PaginaCatalogo({
           <p className="texto-suave">{descripcion}</p>
         </div>
         <button type="button" className="btn btn-primario" onClick={() => setEditando({})}>
-          + Nuevo {singular.toLowerCase()}
+          + {nuevo} {minuscula}
         </button>
       </header>
 
@@ -88,7 +95,7 @@ export default function PaginaCatalogo({
           cargando={cargando}
           error={error}
           onReintentar={recargar}
-          vacio={busqueda ? 'No hay resultados para la búsqueda.' : `Todavía no hay registros. Crea el primero con “Nuevo ${singular.toLowerCase()}”.`}
+          vacio={busqueda ? 'No hay resultados para la búsqueda.' : `Todavía no hay registros. Crea el primero con “${nuevo} ${minuscula}”.`}
           acciones={(fila) => (
             <>
               <button type="button" className="btn btn-pequeno" onClick={() => setEditando(fila)}>
@@ -104,7 +111,7 @@ export default function PaginaCatalogo({
 
       {editando && (
         <Modal
-          titulo={editando.id ? `Editar ${singular.toLowerCase()}` : `Nuevo ${singular.toLowerCase()}`}
+          titulo={editando.id ? `Editar ${minuscula}` : `${nuevo} ${minuscula}`}
           onCerrar={() => setEditando(null)}
         >
           <Formulario inicial={editando} onGuardar={guardar} onCancelar={() => setEditando(null)} />
@@ -113,7 +120,7 @@ export default function PaginaCatalogo({
 
       {eliminando && (
         <ConfirmarEliminar
-          titulo={`Eliminar ${singular.toLowerCase()}`}
+          titulo={`Eliminar ${minuscula}`}
           mensaje={`¿Seguro que quieres eliminar “${nombreDe(eliminando)}”?`}
           onConfirmar={eliminar}
           onCancelar={() => setEliminando(null)}

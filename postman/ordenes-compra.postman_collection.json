@@ -36,6 +36,98 @@
     {
       "key": "numeroPrueba",
       "value": ""
+    },
+    {
+      "key": "categoriaId",
+      "value": ""
+    },
+    {
+      "key": "categoriaNombre",
+      "value": ""
+    },
+    {
+      "key": "codigoMobiliario",
+      "value": ""
+    },
+    {
+      "key": "productoMobiliarioId",
+      "value": ""
+    },
+    {
+      "key": "metodoPagoId",
+      "value": ""
+    },
+    {
+      "key": "metodoNombre",
+      "value": ""
+    },
+    {
+      "key": "empleadoId",
+      "value": ""
+    },
+    {
+      "key": "empleadoCedula",
+      "value": ""
+    },
+    {
+      "key": "bodegaId",
+      "value": ""
+    },
+    {
+      "key": "bodegaNombre",
+      "value": ""
+    },
+    {
+      "key": "contactoId",
+      "value": ""
+    },
+    {
+      "key": "cotizacionId",
+      "value": ""
+    },
+    {
+      "key": "existenciaId",
+      "value": ""
+    },
+    {
+      "key": "requisicionId",
+      "value": ""
+    },
+    {
+      "key": "requisicionNumero",
+      "value": ""
+    },
+    {
+      "key": "ordenPruebaId",
+      "value": ""
+    },
+    {
+      "key": "ordenPruebaNumero",
+      "value": ""
+    },
+    {
+      "key": "ordenPendienteId",
+      "value": ""
+    },
+    {
+      "key": "recepcionId",
+      "value": ""
+    },
+    {
+      "key": "facturaId",
+      "value": ""
+    },
+    {
+      "key": "facturaNumero",
+      "value": ""
+    },
+    {
+      "key": "pagoId",
+      "value": ""
+    },
+    {
+      "key": "pago2Id",
+      "value": ""
     }
   ],
   "item": [
@@ -2148,6 +2240,5257 @@
               "path": [
                 "ordenes",
                 "{{ordenId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "description": "CRUD de categorías de productos y su relación con Productos.",
+      "item": [
+        {
+          "name": "Crear categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{categoriaNombre}}\",\n  \"descripcion\": \"Sillas, escritorios y archivadores\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"categoriaNombre\", \"Mobiliario \" + String(Date.now()).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"categoriaId\", r.id);",
+                  "});",
+                  "pm.test(\"Guarda el nombre\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.nombre).to.eql(pm.collectionVariables.get(\"categoriaNombre\"));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"categoriaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener categoría por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "{{categoriaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"categoriaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "{{categoriaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Mobiliario de oficina\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Descripción actualizada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.descripcion).to.eql(\"Mobiliario de oficina\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear sin nombre (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Sin nombre\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo nombre\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"nombre\");",
+                  "    pm.expect(d, \"detalle de nombre\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nombre duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{categoriaNombre}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/categoría/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear producto con categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"{{codigoMobiliario}}\",\n  \"nombre\": \"Silla ergonómica con apoyabrazos\",\n  \"unidad\": \"unidad\",\n  \"precio_ref\": 85000,\n  \"categoria_id\": {{categoriaId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"codigoMobiliario\", \"MOB-\" + String(Date.now()).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"productoMobiliarioId\", r.id);",
+                  "});",
+                  "pm.test(\"Incluye la categoría\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.categoria.id).to.eql(Number(pm.collectionVariables.get(\"categoriaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar productos por categoría",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos?categoria_id={{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos"
+              ],
+              "query": [
+                {
+                  "key": "categoria_id",
+                  "value": "{{categoriaId}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Todos son de la categoría\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\").that.is.not.empty;",
+                  "    r.forEach((x) => pm.expect(x.categoria_id === Number(pm.collectionVariables.get(\"categoriaId\"))).to.be.true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Producto con categoría inexistente (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"NOEXISTE-1\",\n  \"nombre\": \"Producto de prueba\",\n  \"unidad\": \"unidad\",\n  \"categoria_id\": 999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo categoria_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"categoria_id\");",
+                  "    pm.expect(d, \"detalle de categoria_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/No existe/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar categoría con productos (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "{{categoriaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/producto/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar producto de prueba",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/{{productoMobiliarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "{{productoMobiliarioId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Métodos de pago",
+      "description": "CRUD de métodos de pago a proveedores.",
+      "item": [
+        {
+          "name": "Crear método de pago",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{metodoNombre}}\",\n  \"descripcion\": \"Plataforma del banco\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"metodoNombre\", \"Pago en línea \" + String(Date.now()).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"metodoPagoId\", r.id);",
+                  "});",
+                  "pm.test(\"Activo por defecto\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.activo).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar métodos de pago",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"metodoPagoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener método de pago por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago/{{metodoPagoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago",
+                "{{metodoPagoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"metodoPagoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar método de pago",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago/{{metodoPagoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago",
+                "{{metodoPagoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Banca en línea empresarial\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Descripción actualizada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.descripcion).to.eql(\"Banca en línea empresarial\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear sin nombre (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo nombre\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"nombre\");",
+                  "    pm.expect(d, \"detalle de nombre\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nombre duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{metodoNombre}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/método de pago/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Activo no booleano (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Efectivo\",\n  \"activo\": \"si\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo activo\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"activo\");",
+                  "    pm.expect(d, \"detalle de activo\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Empleados",
+      "description": "CRUD de empleados; cada empleado pertenece a un departamento.",
+      "item": [
+        {
+          "name": "Crear empleado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"{{empleadoCedula}}\",\n  \"nombre\": \"Paula Herrera Castro\",\n  \"puesto\": \"Asistente de compras\",\n  \"email\": \"pherrera@empresa.co.cr\",\n  \"telefono\": \"+506 8899-0011\",\n  \"departamento_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"empleadoCedula\", \"1-\" + String(Math.floor(Math.random() * 10000)).padStart(4, \"0\") + \"-\" + String(Math.floor(Math.random() * 10000)).padStart(4, \"0\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"empleadoId\", r.id);",
+                  "});",
+                  "pm.test(\"Activo por defecto\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.activo).to.eql(true);",
+                  "});",
+                  "pm.test(\"Incluye el departamento\", () => pm.expect(pm.response.json().departamento.nombre).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar empleados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"empleadoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar empleados por departamento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados?departamento_id=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ],
+              "query": [
+                {
+                  "key": "departamento_id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Todos son del departamento 1\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\").that.is.not.empty;",
+                  "    r.forEach((x) => pm.expect(x.departamento_id === 1).to.be.true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener empleado por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados/{{empleadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados",
+                "{{empleadoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"empleadoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar empleado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/empleados/{{empleadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados",
+                "{{empleadoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"puesto\": \"Analista de compras\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Puesto actualizado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.puesto).to.eql(\"Analista de compras\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cédula con formato inválido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"123456789\",\n  \"nombre\": \"Paula Herrera Castro\",\n  \"puesto\": \"Asistente de compras\",\n  \"email\": \"pherrera@empresa.co.cr\",\n  \"telefono\": \"+506 8899-0011\",\n  \"departamento_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo cedula\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"cedula\");",
+                  "    pm.expect(d, \"detalle de cedula\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/1-2345-6789/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Departamento inexistente (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"9-9999-9999\",\n  \"nombre\": \"Paula Herrera Castro\",\n  \"puesto\": \"Asistente de compras\",\n  \"email\": \"pherrera@empresa.co.cr\",\n  \"telefono\": \"+506 8899-0011\",\n  \"departamento_id\": 999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo departamento_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"departamento_id\");",
+                  "    pm.expect(d, \"detalle de departamento_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/No existe/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cédula duplicada (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"{{empleadoCedula}}\",\n  \"nombre\": \"Paula Herrera Castro\",\n  \"puesto\": \"Asistente de compras\",\n  \"email\": \"pherrera@empresa.co.cr\",\n  \"telefono\": \"+506 8899-0011\",\n  \"departamento_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/cédula/));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bodegas",
+      "description": "CRUD de bodegas; el responsable es un empleado.",
+      "item": [
+        {
+          "name": "Crear bodega",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{bodegaNombre}}\",\n  \"ubicacion\": \"Liberia, Guanacaste\",\n  \"responsable_id\": {{empleadoId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"bodegaNombre\", \"Bodega Norte \" + String(Date.now()).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"bodegaId\", r.id);",
+                  "});",
+                  "pm.test(\"Incluye al responsable\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.responsable.id).to.eql(Number(pm.collectionVariables.get(\"empleadoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar bodegas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"bodegaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener bodega por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas/{{bodegaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas",
+                "{{bodegaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"bodegaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar bodega",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas/{{bodegaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas",
+                "{{bodegaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ubicacion\": \"Liberia, Guanacaste · Nave 4\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Ubicación actualizada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.ubicacion).to.eql(\"Liberia, Guanacaste · Nave 4\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear sin campos obligatorios (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Indica cada campo obligatorio faltante\", () => {",
+                  "    const campos = pm.response.json().detalles.map((d) => d.campo);",
+                  "    pm.expect(campos).to.include.members([\"nombre\", \"ubicacion\"]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Responsable inexistente (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Bodega de prueba\",\n  \"ubicacion\": \"Cartago\",\n  \"responsable_id\": 999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo responsable_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"responsable_id\");",
+                  "    pm.expect(d, \"detalle de responsable_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/No existe/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nombre duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{bodegaNombre}}\",\n  \"ubicacion\": \"Otra ubicación\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/bodega/));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Contactos de proveedor",
+      "description": "CRUD de contactos; cada proveedor tiene un solo contacto principal.",
+      "item": [
+        {
+          "name": "Crear contacto principal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proveedor_id\": 1,\n  \"nombre\": \"Laura Gómez Pérez\",\n  \"puesto\": \"Ejecutiva de cuenta\",\n  \"email\": \"lgomez@sofvalle.co.cr\",\n  \"principal\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"contactoId\", r.id);",
+                  "});",
+                  "pm.test(\"Incluye el proveedor\", () => pm.expect(pm.response.json().proveedor.razon_social).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Solo un contacto principal por proveedor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor?proveedor_id=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor"
+              ],
+              "query": [
+                {
+                  "key": "proveedor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Todos son del proveedor 1\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\").that.is.not.empty;",
+                  "    r.forEach((x) => pm.expect(x.proveedor_id === 1).to.be.true);",
+                  "});",
+                  "pm.test(\"El nuevo contacto es el único principal\", () => {",
+                  "    const principales = pm.response.json().filter((c) => c.principal);",
+                  "    pm.expect(principales).to.have.lengthOf(1);",
+                  "    pm.expect(principales[0].id).to.eql(Number(pm.collectionVariables.get(\"contactoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener contacto por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor/{{contactoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor",
+                "{{contactoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"contactoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar contacto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor/{{contactoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor",
+                "{{contactoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"+506 8777-6655\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Teléfono actualizado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.telefono).to.eql(\"+506 8777-6655\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Email inválido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proveedor_id\": 1,\n  \"nombre\": \"Contacto de prueba\",\n  \"email\": \"no-es-un-email\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo email\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"email\");",
+                  "    pm.expect(d, \"detalle de email\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Proveedor inexistente (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proveedor_id\": 999999,\n  \"nombre\": \"Contacto de prueba\",\n  \"email\": \"prueba@proveedor.co.cr\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo proveedor_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"proveedor_id\");",
+                  "    pm.expect(d, \"detalle de proveedor_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/No existe/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar contacto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor/{{contactoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor",
+                "{{contactoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener contacto eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor/{{contactoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor",
+                "{{contactoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Restaurar contacto principal del seed",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contactos-proveedor/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contactos-proveedor",
+                "1"
+              ]
+            },
+            "description": "Devuelve el rol de contacto principal al contacto cargado por el seed.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"principal\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Vuelve a ser principal\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.principal).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cotizaciones",
+      "description": "CRUD de cotizaciones de proveedores por producto.",
+      "item": [
+        {
+          "name": "Crear cotización",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proveedor_id\": 2,\n  \"producto_id\": 1,\n  \"fecha\": \"2026-11-05\",\n  \"vigencia_hasta\": \"2026-12-05\",\n  \"precio\": 2800,\n  \"dias_entrega\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"cotizacionId\", r.id);",
+                  "});",
+                  "pm.test(\"Incluye proveedor y producto\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.proveedor.razon_social).to.be.a(\"string\");",
+                  "    pm.expect(r.producto.codigo).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar cotizaciones por producto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones?producto_id=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones"
+              ],
+              "query": [
+                {
+                  "key": "producto_id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"cotizacionId\")));",
+                  "});",
+                  "pm.test(\"Todas son del producto 1\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\").that.is.not.empty;",
+                  "    r.forEach((x) => pm.expect(x.producto_id === 1).to.be.true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener cotización por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones/{{cotizacionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones",
+                "{{cotizacionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"cotizacionId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar cotización",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones/{{cotizacionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones",
+                "{{cotizacionId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"precio\": 2750\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Precio actualizado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.precio).to.eql(2750);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vigencia anterior a la fecha (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proveedor_id\": 2,\n  \"producto_id\": 1,\n  \"fecha\": \"2026-11-05\",\n  \"vigencia_hasta\": \"2026-11-01\",\n  \"precio\": 2800,\n  \"dias_entrega\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo vigencia_hasta\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"vigencia_hasta\");",
+                  "    pm.expect(d, \"detalle de vigencia_hasta\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Proveedor inactivo (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones"
+              ]
+            },
+            "description": "El proveedor 4 del seed está inactivo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proveedor_id\": 4,\n  \"producto_id\": 1,\n  \"fecha\": \"2026-11-05\",\n  \"vigencia_hasta\": \"2026-12-05\",\n  \"precio\": 2800,\n  \"dias_entrega\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo proveedor_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"proveedor_id\");",
+                  "    pm.expect(d, \"detalle de proveedor_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/inactivo/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Precio negativo (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proveedor_id\": 2,\n  \"producto_id\": 1,\n  \"fecha\": \"2026-11-05\",\n  \"vigencia_hasta\": \"2026-12-05\",\n  \"precio\": -10,\n  \"dias_entrega\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo precio\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"precio\");",
+                  "    pm.expect(d, \"detalle de precio\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar cotización",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones/{{cotizacionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones",
+                "{{cotizacionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener cotización eliminada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones/{{cotizacionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones",
+                "{{cotizacionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Existencias",
+      "description": "CRUD de existencias: un producto aparece una sola vez por bodega.",
+      "item": [
+        {
+          "name": "Crear existencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/existencias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"producto_id\": 1,\n  \"bodega_id\": {{bodegaId}},\n  \"cantidad\": 40,\n  \"minimo\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"existenciaId\", r.id);",
+                  "});",
+                  "pm.test(\"Incluye la bodega\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.bodega.id).to.eql(Number(pm.collectionVariables.get(\"bodegaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar existencias por bodega",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/existencias?bodega_id={{bodegaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias"
+              ],
+              "query": [
+                {
+                  "key": "bodega_id",
+                  "value": "{{bodegaId}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"existenciaId\")));",
+                  "});",
+                  "pm.test(\"Todas son de la bodega\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\").that.is.not.empty;",
+                  "    r.forEach((x) => pm.expect(x.bodega_id === Number(pm.collectionVariables.get(\"bodegaId\"))).to.be.true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener existencia por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/existencias/{{existenciaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias",
+                "{{existenciaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"existenciaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar existencia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/existencias/{{existenciaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias",
+                "{{existenciaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Cantidad actualizada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.cantidad).to.eql(25);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Producto repetido en la bodega (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/existencias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"producto_id\": 1,\n  \"bodega_id\": {{bodegaId}},\n  \"cantidad\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/ya tiene una existencia/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cantidad negativa (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/existencias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"producto_id\": 2,\n  \"bodega_id\": {{bodegaId}},\n  \"cantidad\": -5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo cantidad\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"cantidad\");",
+                  "    pm.expect(d, \"detalle de cantidad\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar bodega con existencias (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas/{{bodegaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas",
+                "{{bodegaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/existencia/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar existencia",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/existencias/{{existenciaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias",
+                "{{existenciaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener existencia eliminada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/existencias/{{existenciaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias",
+                "{{existenciaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Requisiciones",
+      "description": "CRUD de requisiciones de compra con su ciclo pendiente → aprobada / rechazada.",
+      "item": [
+        {
+          "name": "Crear requisición",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"{{requisicionNumero}}\",\n  \"fecha\": \"2026-11-05\",\n  \"empleado_id\": {{empleadoId}},\n  \"descripcion\": \"Sillas para la sala de reuniones\",\n  \"prioridad\": \"alta\",\n  \"monto_estimado\": 510000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"requisicionNumero\", \"REQ-T-\" + String(Date.now()).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"requisicionId\", r.id);",
+                  "});",
+                  "pm.test(\"Se crea pendiente\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.estado).to.eql(\"pendiente\");",
+                  "});",
+                  "pm.test(\"Incluye el empleado y su departamento\", () => pm.expect(pm.response.json().empleado.departamento.nombre).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar requisiciones pendientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones?estado=pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"requisicionId\")));",
+                  "});",
+                  "pm.test(\"Todas están pendientes\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\").that.is.not.empty;",
+                  "    r.forEach((x) => pm.expect(x.estado === \"pendiente\").to.be.true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener requisición por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones/{{requisicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones",
+                "{{requisicionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"requisicionId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar requisición",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones/{{requisicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones",
+                "{{requisicionId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"monto_estimado\": 480000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Monto actualizado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.monto_estimado).to.eql(480000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Prioridad inválida (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"REQ-T-PRIORIDAD\",\n  \"fecha\": \"2026-11-05\",\n  \"empleado_id\": {{empleadoId}},\n  \"descripcion\": \"Sillas para la sala de reuniones\",\n  \"prioridad\": \"urgente\",\n  \"monto_estimado\": 510000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo prioridad\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"prioridad\");",
+                  "    pm.expect(d, \"detalle de prioridad\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Número duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"{{requisicionNumero}}\",\n  \"fecha\": \"2026-11-05\",\n  \"empleado_id\": {{empleadoId}},\n  \"descripcion\": \"Sillas para la sala de reuniones\",\n  \"prioridad\": \"alta\",\n  \"monto_estimado\": 510000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/requisición/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Empleado inactivo (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones"
+              ]
+            },
+            "description": "El empleado 6 del seed está inactivo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"REQ-T-INACTIVO\",\n  \"fecha\": \"2026-11-05\",\n  \"empleado_id\": 6,\n  \"descripcion\": \"Sillas para la sala de reuniones\",\n  \"prioridad\": \"alta\",\n  \"monto_estimado\": 510000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo empleado_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"empleado_id\");",
+                  "    pm.expect(d, \"detalle de empleado_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/inactivo/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar empleado con requisiciones (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados/{{empleadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados",
+                "{{empleadoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/requisición/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechazar requisición",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones/{{requisicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones",
+                "{{requisicionId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"rechazada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Queda rechazada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.estado).to.eql(\"rechazada\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modificar requisición rechazada (409)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones/{{requisicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones",
+                "{{requisicionId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Cambio no permitido\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/solo se modifica una requisición pendiente/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar requisición",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones/{{requisicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones",
+                "{{requisicionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener requisición eliminada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requisiciones/{{requisicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requisiciones",
+                "{{requisicionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Recepciones",
+      "description": "CRUD de recepciones de mercancía: solo para órdenes aprobadas o recibidas.",
+      "item": [
+        {
+          "name": "Crear orden de prueba",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes"
+              ]
+            },
+            "description": "Orden que se usa en Recepciones y Facturas; se elimina al final.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"{{ordenPruebaNumero}}\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 1,\n  \"detalles\": [\n    {\n      \"producto_id\": 1,\n      \"cantidad\": 10,\n      \"precio_unitario\": 2950\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"ordenPruebaNumero\", \"OC-T-\" + String(Date.now()).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"ordenPruebaId\", r.id);",
+                  "});",
+                  "pm.test(\"Total calculado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.total).to.eql(29500);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aprobar orden de prueba",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenPruebaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Queda aprobada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.estado).to.eql(\"aprobada\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar una orden pendiente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes?estado=pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Hay al menos una orden pendiente\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\").that.is.not.empty;",
+                  "    pm.collectionVariables.set(\"ordenPendienteId\", r[0].id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear recepción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orden_id\": {{ordenPruebaId}},\n  \"bodega_id\": {{bodegaId}},\n  \"empleado_id\": {{empleadoId}},\n  \"fecha\": \"2026-11-06\",\n  \"observaciones\": \"Entrega parcial: 6 de 10 resmas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"recepcionId\", r.id);",
+                  "});",
+                  "pm.test(\"Incluye la orden\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.orden.id).to.eql(Number(pm.collectionVariables.get(\"ordenPruebaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar recepciones por orden",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones?orden_id={{ordenPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones"
+              ],
+              "query": [
+                {
+                  "key": "orden_id",
+                  "value": "{{ordenPruebaId}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"recepcionId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener recepción por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones/{{recepcionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones",
+                "{{recepcionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"recepcionId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar recepción",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones/{{recepcionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones",
+                "{{recepcionId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observaciones\": \"Entrega completa, sin daños\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Observaciones actualizadas\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.observaciones).to.eql(\"Entrega completa, sin daños\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recepción de una orden pendiente (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orden_id\": {{ordenPendienteId}},\n  \"bodega_id\": {{bodegaId}},\n  \"empleado_id\": {{empleadoId}},\n  \"fecha\": \"2026-11-06\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo orden_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"orden_id\");",
+                  "    pm.expect(d, \"detalle de orden_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/aprobada o recibida/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bodega inexistente (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orden_id\": {{ordenPruebaId}},\n  \"bodega_id\": 999999,\n  \"empleado_id\": {{empleadoId}},\n  \"fecha\": \"2026-11-06\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo bodega_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"bodega_id\");",
+                  "    pm.expect(d, \"detalle de bodega_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/No existe/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fecha inválida (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orden_id\": {{ordenPruebaId}},\n  \"bodega_id\": {{bodegaId}},\n  \"empleado_id\": {{empleadoId}},\n  \"fecha\": \"06/11/2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo fecha\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"fecha\");",
+                  "    pm.expect(d, \"detalle de fecha\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/AAAA-MM-DD/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar recepción",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones/{{recepcionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones",
+                "{{recepcionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener recepción eliminada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recepciones/{{recepcionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recepciones",
+                "{{recepcionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Facturas",
+      "description": "CRUD de facturas de proveedor; lo facturado no puede superar el total de la orden.",
+      "item": [
+        {
+          "name": "Crear factura",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"{{facturaNumero}}\",\n  \"orden_id\": {{ordenPruebaId}},\n  \"fecha\": \"2026-11-05\",\n  \"fecha_vencimiento\": \"2026-12-05\",\n  \"monto\": 10000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"facturaNumero\", \"FAC-T-\" + String(Date.now()).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"facturaId\", r.id);",
+                  "});",
+                  "pm.test(\"Se crea pendiente y sin pagos\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.estado).to.eql(\"pendiente\");",
+                  "    pm.expect(r.pagado).to.eql(0);",
+                  "    pm.expect(r.orden.proveedor.razon_social).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar facturas pendientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas?estado=pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo que incluye el registro creado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\");",
+                  "    pm.expect(r.map((x) => x.id)).to.include(Number(pm.collectionVariables.get(\"facturaId\")));",
+                  "});",
+                  "pm.test(\"Todas están pendientes\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.be.an(\"array\").that.is.not.empty;",
+                  "    r.forEach((x) => pm.expect(x.estado === \"pendiente\").to.be.true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener factura por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"facturaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar factura",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha_vencimiento\": \"2026-12-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Vencimiento actualizado\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.fecha_vencimiento).to.eql(\"2026-12-20\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vencimiento anterior a la fecha (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"FAC-T-VENCE\",\n  \"orden_id\": {{ordenPruebaId}},\n  \"fecha\": \"2026-11-05\",\n  \"fecha_vencimiento\": \"2026-11-01\",\n  \"monto\": 10000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo fecha_vencimiento\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"fecha_vencimiento\");",
+                  "    pm.expect(d, \"detalle de fecha_vencimiento\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Factura de una orden pendiente (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"FAC-T-PEND\",\n  \"orden_id\": {{ordenPendienteId}},\n  \"fecha\": \"2026-11-05\",\n  \"fecha_vencimiento\": \"2026-12-05\",\n  \"monto\": 10000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo orden_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"orden_id\");",
+                  "    pm.expect(d, \"detalle de orden_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/aprobada o recibida/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Monto mayor a lo pendiente de facturar (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "description": "La orden de prueba suma ₡29 500 y ya tiene ₡10 000 facturados.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"FAC-T-EXCEDE\",\n  \"orden_id\": {{ordenPruebaId}},\n  \"fecha\": \"2026-11-05\",\n  \"fecha_vencimiento\": \"2026-12-05\",\n  \"monto\": 50000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/pendiente de facturar/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Número duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"{{facturaNumero}}\",\n  \"orden_id\": {{ordenPruebaId}},\n  \"fecha\": \"2026-11-05\",\n  \"fecha_vencimiento\": \"2026-12-05\",\n  \"monto\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/factura/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar como pagada a mano (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"pagada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo estado\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"estado\");",
+                  "    pm.expect(d, \"detalle de estado\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/automáticamente/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pagos",
+      "description": "CRUD de pagos: actualizan lo pagado y el estado de la factura.",
+      "item": [
+        {
+          "name": "Crear pago parcial",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"factura_id\": {{facturaId}},\n  \"metodo_pago_id\": {{metodoPagoId}},\n  \"fecha\": \"2026-11-06\",\n  \"monto\": 4000,\n  \"referencia\": \"TRF-T-0001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"pagoId\", r.id);",
+                  "});",
+                  "pm.test(\"La factura sigue pendiente con ₡4 000 pagados\", () => {",
+                  "    const f = pm.response.json().factura;",
+                  "    pm.expect(f.estado).to.eql(\"pendiente\");",
+                  "    pm.expect(f.pagado).to.eql(4000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pago mayor al saldo (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"factura_id\": {{facturaId}},\n  \"metodo_pago_id\": {{metodoPagoId}},\n  \"fecha\": \"2026-11-06\",\n  \"monto\": 7000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/saldo pendiente/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear pago que completa la factura",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"factura_id\": {{facturaId}},\n  \"metodo_pago_id\": {{metodoPagoId}},\n  \"fecha\": \"2026-11-07\",\n  \"monto\": 6000,\n  \"referencia\": \"TRF-T-0002\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el registro creado con id\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "    pm.collectionVariables.set(\"pago2Id\", r.id);",
+                  "});",
+                  "pm.test(\"La factura queda pagada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.factura.estado).to.eql(\"pagada\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "La factura queda pagada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Estado pagada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.estado).to.eql(\"pagada\");",
+                  "});",
+                  "pm.test(\"Pagado ₡10 000\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.pagado).to.eql(10000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar pagos por factura",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pagos?factura_id={{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos"
+              ],
+              "query": [
+                {
+                  "key": "factura_id",
+                  "value": "{{facturaId}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"La factura tiene dos pagos\", () => pm.expect(pm.response.json()).to.have.lengthOf(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener pago por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pagos/{{pagoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos",
+                "{{pagoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el registro solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"pagoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar pago",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagos/{{pago2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos",
+                "{{pago2Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"monto\": 5000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"La factura vuelve a pendiente con ₡9 000 pagados\", () => {",
+                  "    const f = pm.response.json().factura;",
+                  "    pm.expect(f.estado).to.eql(\"pendiente\");",
+                  "    pm.expect(f.pagado).to.eql(9000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Método de pago inexistente (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"factura_id\": {{facturaId}},\n  \"metodo_pago_id\": 999999,\n  \"fecha\": \"2026-11-07\",\n  \"monto\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo metodo_pago_id\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"metodo_pago_id\");",
+                  "    pm.expect(d, \"detalle de metodo_pago_id\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/No existe/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Monto cero (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"factura_id\": {{facturaId}},\n  \"metodo_pago_id\": {{metodoPagoId}},\n  \"fecha\": \"2026-11-07\",\n  \"monto\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala el campo monto\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"monto\");",
+                  "    pm.expect(d, \"detalle de monto\").to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Anular factura con pagos (409)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"anulada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/pagos registrados/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar factura con pagos (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/pago/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar método de pago con pagos (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago/{{metodoPagoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago",
+                "{{metodoPagoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/pago/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar pago",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pagos/{{pago2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos",
+                "{{pago2Id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "La factura descuenta el pago eliminado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Pagado ₡4 000\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.pagado).to.eql(4000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar el otro pago",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pagos/{{pagoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos",
+                "{{pagoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener pago eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pagos/{{pagoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pagos",
+                "{{pagoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Limpieza y reglas finales",
+      "description": "Borra los registros creados por las pruebas, en orden inverso a sus dependencias.",
+      "item": [
+        {
+          "name": "Anular factura",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"anulada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Queda anulada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.estado).to.eql(\"anulada\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modificar factura anulada (409)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"monto\": 5000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/anulada/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar factura",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Anular orden de prueba",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenPruebaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"anulada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Queda anulada\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.estado).to.eql(\"anulada\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar orden de prueba",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenPruebaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar bodega",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas/{{bodegaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas",
+                "{{bodegaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar empleado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados/{{empleadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados",
+                "{{empleadoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar método de pago",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago/{{metodoPagoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago",
+                "{{metodoPagoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "{{categoriaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener bodega eliminada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bodegas/{{bodegaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bodegas",
+                "{{bodegaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener empleado eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empleados/{{empleadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "empleados",
+                "{{empleadoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener método de pago eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metodos-pago/{{metodoPagoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodos-pago",
+                "{{metodoPagoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener categoría eliminada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "{{categoriaId}}"
               ]
             }
           },

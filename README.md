@@ -1,6 +1,8 @@
 # Órdenes de Compra
 
-Sistema para centralizar las órdenes de compra de una empresa: departamentos solicitantes, proveedores, catálogo de productos y el estado de cada pedido, con control del gasto por departamento.
+Sistema para centralizar el ciclo de compras de una empresa: requisiciones, cotizaciones, órdenes de compra, recepción en bodegas, facturas de proveedor y pagos, con control del gasto por departamento.
+
+**15 CRUDs completos · 16 tablas · 76 endpoints REST · 16 pantallas en React.**
 
 - **API REST** en Node.js + Express, con MySQL y Sequelize.
 - **Aplicación web** en React + Vite que consume la API.
@@ -11,7 +13,15 @@ Sistema para centralizar las órdenes de compra de una empresa: departamentos so
 
 - **Resumen:** órdenes pendientes de aprobación, órdenes aprobadas por recibir, gasto comprometido y uso del presupuesto de cada departamento.
 - **Órdenes de compra:** alta con varias líneas de productos, cálculo automático de subtotales y total, filtro por estado y ciclo de aprobación.
-- **Proveedores, departamentos y productos:** CRUD completo con búsqueda, formularios de alta y edición, y eliminación con confirmación.
+- **15 CRUDs** con búsqueda, formularios de alta y edición, y eliminación con confirmación, agrupados por área:
+
+| Área | CRUDs |
+|---|---|
+| Compras | Órdenes de compra, Requisiciones, Cotizaciones, Recepciones |
+| Cuentas por pagar | Facturas, Pagos, Métodos de pago |
+| Catálogos | Proveedores, Contactos de proveedor, Productos, Categorías |
+| Inventario | Bodegas, Existencias |
+| Organización | Departamentos, Empleados |
 - **Validaciones** en el back end, con mensajes de error que la interfaz muestra junto a cada campo.
 
 ### Reglas de negocio
@@ -27,6 +37,17 @@ Sistema para centralizar las órdenes de compra de una empresa: departamentos so
 | No se elimina un departamento, proveedor o producto que ya forma parte de una orden | 409 |
 | La cédula jurídica del proveedor debe tener el formato `3-101-123456` | 400 |
 | Cédula jurídica del proveedor, código del producto y número de orden son únicos | 409 |
+| La cédula del empleado debe tener el formato `1-2345-6789` y es única | 400 / 409 |
+| Un empleado inactivo no puede crear requisiciones ni recibir mercancía | 400 |
+| Solo una requisición pendiente se puede modificar; una aprobada no se elimina | 409 |
+| La vigencia de una cotización no puede ser anterior a su fecha; un proveedor inactivo no cotiza | 400 |
+| Cada proveedor tiene un solo contacto principal (al marcar uno, los demás dejan de serlo) | — |
+| Solo se registran recepciones y facturas de órdenes aprobadas o recibidas | 400 |
+| Un producto aparece una sola vez por bodega en existencias | 409 |
+| Lo facturado de una orden no puede superar su total; el vencimiento no puede ser anterior a la fecha | 409 / 400 |
+| Un pago no puede superar el saldo de la factura; al cubrirlo la factura pasa a `pagada` sola | 409 |
+| Una factura con pagos no se anula ni se elimina; una anulada ya no se modifica | 409 |
+| No se elimina un registro que otro todavía usa (categoría con productos, bodega con existencias, etc.) | 409 |
 
 ## Requisitos
 
@@ -66,7 +87,7 @@ Sistema para centralizar las órdenes de compra de una empresa: departamentos so
 CREATE DATABASE ordenes_compra CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Las tablas no se crean a mano: el servidor las genera con `sequelize.sync()` al arrancar.
+Las tablas no se crean a mano: el servidor las genera con `sequelize.sync()` al arrancar. Si vienes de una versión anterior del proyecto, ejecuta `npm run seed` para recrearlas con las columnas nuevas.
 
 ### 2. Configurar el back end
 
@@ -94,7 +115,7 @@ npm install
 npm run seed
 ```
 
-El seed **recrea las tablas** y carga 3 departamentos, 4 proveedores, 5 productos y 3 órdenes de compra (una pendiente, una aprobada y una recibida). No lo ejecutes sobre una base con datos que quieras conservar.
+El seed **recrea las 16 tablas** y carga datos de ejemplo en todas: departamentos, empleados, proveedores con sus contactos, categorías, productos, requisiciones, cotizaciones, 3 órdenes de compra (una pendiente, una aprobada y una recibida), bodegas, existencias, recepciones, facturas, pagos y métodos de pago. No lo ejecutes sobre una base con datos que quieras conservar.
 
 ### 4. Levantar la API
 
@@ -127,14 +148,25 @@ Todas las rutas cuelgan de `/api` y responden JSON. Cada recurso tiene las cinco
 | `PUT` | `/api/{recurso}/:id` | 200 con el registro actualizado (se envían solo los campos que cambian) |
 | `DELETE` | `/api/{recurso}/:id` | 204; 409 si el registro está en uso |
 
-| Recurso | Campos (`*` obligatorio al crear) |
-|---|---|
-| `departamentos` | `nombre*`, `centro_costo*`, `presupuesto` |
-| `proveedores` | `razon_social*`, `cedula_juridica*` (única, formato `3-101-123456`), `email*`, `telefono`, `activo` (por defecto `true`) |
-| `productos` | `codigo*` (único), `nombre*`, `unidad*`, `precio_ref` |
-| `ordenes` | `numero*` (único), `fecha*` (AAAA-MM-DD), `departamento_id*`, `proveedor_id*`, `detalles*`, `estado` (solo al actualizar) |
+| Recurso | Campos (`*` obligatorio al crear) | Filtros del listado |
+|---|---|---|
+| `departamentos` | `nombre*`, `centro_costo*`, `presupuesto` | — |
+| `empleados` | `cedula*` (única, `1-2345-6789`), `nombre*`, `puesto*`, `email*`, `departamento_id*`, `telefono`, `activo` | `departamento_id` |
+| `proveedores` | `razon_social*`, `cedula_juridica*` (única, `3-101-123456`), `email*`, `telefono`, `activo` | — |
+| `contactos-proveedor` | `proveedor_id*`, `nombre*`, `email*`, `puesto`, `telefono`, `principal` | `proveedor_id` |
+| `categorias` | `nombre*` (único), `descripcion` | — |
+| `productos` | `codigo*` (único), `nombre*`, `unidad*`, `precio_ref`, `categoria_id` | `categoria_id` |
+| `requisiciones` | `numero*` (único), `fecha*`, `empleado_id*`, `descripcion*`, `prioridad`, `monto_estimado`, `estado` (al actualizar) | `estado`, `empleado_id` |
+| `cotizaciones` | `proveedor_id*`, `producto_id*`, `fecha*`, `vigencia_hasta*`, `precio*`, `dias_entrega`, `observaciones` | `proveedor_id`, `producto_id` |
+| `ordenes` | `numero*` (único), `fecha*`, `departamento_id*`, `proveedor_id*`, `detalles*`, `estado` (al actualizar) | `estado`, `departamento_id`, `proveedor_id` |
+| `recepciones` | `orden_id*`, `bodega_id*`, `empleado_id*`, `fecha*`, `observaciones` | `orden_id`, `bodega_id` |
+| `bodegas` | `nombre*` (único), `ubicacion*`, `responsable_id`, `activa` | — |
+| `existencias` | `producto_id*`, `bodega_id*`, `cantidad*`, `minimo` | `producto_id`, `bodega_id` |
+| `facturas` | `numero*` (único), `orden_id*`, `fecha*`, `fecha_vencimiento*`, `monto*`, `estado` (al actualizar: `pendiente` o `anulada`) | `estado`, `orden_id` |
+| `pagos` | `factura_id*`, `metodo_pago_id*`, `fecha*`, `monto*`, `referencia` | `factura_id`, `metodo_pago_id` |
+| `metodos-pago` | `nombre*` (único), `descripcion`, `activo` | — |
 
-`GET /api/ordenes` acepta los filtros `?estado=`, `?departamento_id=` y `?proveedor_id=`. `GET /api/ordenes/:id` incluye las líneas con su producto.
+Las fechas van en formato `AAAA-MM-DD`. Las respuestas incluyen los datos básicos de los registros relacionados (por ejemplo, un empleado trae su `departamento`). `GET /api/ordenes/:id` incluye las líneas con su producto. Además de los 75 endpoints de los CRUDs, `GET /api` indica si el servicio está activo.
 
 Ejemplo para crear una orden:
 
@@ -151,7 +183,7 @@ Ejemplo para crear una orden:
 }
 ```
 
-Los montos (`presupuesto`, `precio_ref`, `precio_unitario`, `subtotal`, `total`) están en colones costarricenses (₡) con dos decimales.
+Todos los montos están en colones costarricenses (₡) con dos decimales.
 
 Para cambiar el estado se envía solo `{ "estado": "aprobada" }`. Si se envía `detalles` en un `PUT`, las líneas de la orden se reemplazan y el total se recalcula.
 
@@ -177,7 +209,7 @@ Todas las respuestas de error tienen la misma forma:
 
 ## Pruebas
 
-La colección `postman/ordenes-compra.postman_collection.json` cubre el CRUD de las cuatro entidades, las reglas de negocio y los casos de error. Con la API levantada y el seed recién cargado:
+La colección `postman/ordenes-compra.postman_collection.json` cubre los 15 CRUDs, las reglas de negocio y los casos de error. Las pruebas crean sus propios registros y los eliminan al final, así que se pueden repetir. Con la API levantada y el seed recién cargado:
 
 ```bash
 postman collection run postman/ordenes-compra.postman_collection.json
@@ -185,7 +217,7 @@ postman collection run postman/ordenes-compra.postman_collection.json
 
 También puede importarse en la aplicación de Postman. La variable `baseUrl` apunta a `http://localhost:3000/api`.
 
-Resultado de la última ejecución (48 peticiones, 108 aserciones, 0 fallos):
+Resultado de la última ejecución (171 peticiones, 404 aserciones, 0 fallos):
 
 ![Resultado de las pruebas con Postman CLI](docs/evidencias/pruebas-postman.png)
 
@@ -196,6 +228,10 @@ La salida completa en texto está en [`docs/evidencias/pruebas-postman.txt`](doc
 | Resumen | Proveedores |
 |---|---|
 | ![Resumen](docs/evidencias/pantalla-resumen.png) | ![Proveedores](docs/evidencias/pantalla-proveedores.png) |
+| **Facturas** | **Requisiciones** |
+| ![Facturas](docs/evidencias/pantalla-facturas.png) | ![Requisiciones](docs/evidencias/pantalla-requisiciones.png) |
+| **Existencias** | **Empleados** |
+| ![Existencias](docs/evidencias/pantalla-existencias.png) | ![Empleados](docs/evidencias/pantalla-empleados.png) |
 
 ## Documentación
 

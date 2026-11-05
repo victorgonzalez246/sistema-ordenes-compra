@@ -203,3 +203,29 @@ code { font-family: Consolas, 'Cascadia Mono', monospace; font-size: 0.9em; back
   .linea-subtotal { padding-top: 0; text-align: left; align-self: center; }
   .linea .btn-icono { justify-self: end; }
 }
+
+/* ---------- Menú agrupado por área ---------- */
+.barra-lateral { overflow-y: auto; }
+.marca { margin-bottom: 14px; }
+.nav-grupo { display: flex; flex-direction: column; gap: 1px; }
+.nav-grupo + .nav-grupo { margin-top: 6px; }
+.nav-titulo { font-size: 11px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: #7fa3a3; padding: 3px 12px; }
+.nav-grupo .nav-enlace { padding: 4px 12px; font-size: 14px; }
+
+/* ---------- Más estados ---------- */
+.estado-rechazada, .prioridad-alta { background: var(--peligro-claro); color: var(--peligro); border-color: #f5c2bd; }
+.estado-pagada { background: var(--exito-claro); color: var(--exito); border-color: #b7dfc2; }
+.prioridad-media { background: var(--aviso-claro); color: var(--aviso); border-color: #f0d68a; }
+.prioridad-baja { background: #eef1f4; color: #57606a; border-color: #d0d7de; }
+
+/* ---------- Áreas de texto ---------- */
+.campo textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--borde-fuerte); border-radius: 8px; background: #fff; width: 100%; min-width: 0; resize: vertical; box-sizing: border-box; }
+.campo textarea:focus { outline: none; border-color: var(--primario); box-shadow: 0 0 0 3px rgba(15, 110, 110, 0.18); }
+.campo-con-error textarea { border-color: var(--peligro); }
+
+@media (max-width: 760px) {
+  .barra-lateral nav { flex-direction: row; overflow-x: auto; gap: 4px; }
+  .nav-grupo { flex-direction: row; gap: 4px; }
+  .nav-grupo + .nav-grupo { margin-top: 0; }
+  .nav-titulo { display: none; }
+}

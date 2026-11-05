@@ -1,17 +1,17 @@
-const { Producto, DetalleOrden } = require('../models');
-const { HttpError } = require('../middlewares/errorHandler');
+const { Producto, Categoria, DetalleOrden, Existencia, Cotizacion } = require('../models');
 const crearControladorCrud = require('./crudController');
+const { verificarReferencias, sinDependencias } = require('./reglas');
 
 module.exports = crearControladorCrud(Producto, {
   articulo: 'un producto',
   orden: [['codigo', 'ASC']],
-  async antesDeEliminar(producto) {
-    const lineas = await DetalleOrden.count({ where: { producto_id: producto.id } });
-    if (lineas > 0) {
-      throw new HttpError(
-        409,
-        `No se puede eliminar el producto: aparece en ${lineas} línea(s) de órdenes de compra`
-      );
-    }
+  incluir: [{ model: Categoria, as: 'categoria', attributes: ['id', 'nombre'] }],
+  async antesDeGuardar(datos) {
+    await verificarReferencias(datos, [{ campo: 'categoria_id', Modelo: Categoria, nombre: 'una categoría' }]);
   },
+  antesDeEliminar: sinDependencias('el producto', [
+    { Modelo: DetalleOrden, campo: 'producto_id', texto: 'línea(s) en órdenes de compra' },
+    { Modelo: Existencia, campo: 'producto_id', texto: 'existencia(s) en bodegas' },
+    { Modelo: Cotizacion, campo: 'producto_id', texto: 'cotización(es) registrada(s)' },
+  ]),
 });

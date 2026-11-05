@@ -1,7 +1,9 @@
 import Campo from './Campo';
 import PieFormulario from './PieFormulario';
 import { useFormulario } from '../hooks/useFormulario';
+import SelectRelacion from './SelectRelacion';
 import { numeroONulo } from '../utils/formato';
+import { fuentes } from '../services/fuentes';
 
 const UNIDADES = ['unidad', 'caja', 'paquete', 'kit', 'resma', 'metro', 'kilogramo', 'litro', 'galón', 'servicio'];
 
@@ -11,6 +13,7 @@ export default function ProductoForm({ inicial, onGuardar, onCancelar }) {
     nombre: inicial.nombre ?? '',
     unidad: inicial.unidad ?? '',
     precio_ref: inicial.precio_ref ?? '',
+    categoria_id: inicial.categoria_id ?? '',
   });
 
   function alEnviar(e) {
@@ -21,6 +24,7 @@ export default function ProductoForm({ inicial, onGuardar, onCancelar }) {
         nombre: valores.nombre.trim(),
         unidad: valores.unidad.trim(),
         precio_ref: numeroONulo(valores.precio_ref),
+        categoria_id: numeroONulo(valores.categoria_id),
       })
     );
   }
@@ -43,6 +47,9 @@ export default function ProductoForm({ inicial, onGuardar, onCancelar }) {
           </Campo>
           <Campo etiqueta="Nombre" requerido error={errores.nombre} className="ancho-completo">
             <input {...enlazar('nombre')} required maxLength={150} />
+          </Campo>
+          <Campo etiqueta="Categoría" error={errores.categoria_id}>
+            <SelectRelacion {...enlazar('categoria_id')} fuente={fuentes.categoria} valorActual={inicial.categoria_id} />
           </Campo>
           <Campo etiqueta="Precio de referencia (₡)" error={errores.precio_ref}>
             <input {...enlazar('precio_ref')} type="number" min="0" step="0.01" inputMode="decimal" />

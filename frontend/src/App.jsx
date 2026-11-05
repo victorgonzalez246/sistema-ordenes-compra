@@ -2,17 +2,67 @@ import { useEffect, useState } from 'react';
 import { AvisosProvider } from './components/Avisos';
 import ResumenPage from './pages/ResumenPage';
 import OrdenesPage from './pages/OrdenesPage';
+import RequisicionesPage from './pages/RequisicionesPage';
+import CotizacionesPage from './pages/CotizacionesPage';
+import RecepcionesPage from './pages/RecepcionesPage';
+import FacturasPage from './pages/FacturasPage';
+import PagosPage from './pages/PagosPage';
+import MetodosPagoPage from './pages/MetodosPagoPage';
 import ProveedoresPage from './pages/ProveedoresPage';
-import DepartamentosPage from './pages/DepartamentosPage';
+import ContactosPage from './pages/ContactosPage';
 import ProductosPage from './pages/ProductosPage';
+import CategoriasPage from './pages/CategoriasPage';
+import BodegasPage from './pages/BodegasPage';
+import ExistenciasPage from './pages/ExistenciasPage';
+import DepartamentosPage from './pages/DepartamentosPage';
+import EmpleadosPage from './pages/EmpleadosPage';
 
-const RUTAS = [
-  { ruta: '/', titulo: 'Resumen', Pagina: ResumenPage },
-  { ruta: '/ordenes', titulo: 'Órdenes de compra', Pagina: OrdenesPage },
-  { ruta: '/proveedores', titulo: 'Proveedores', Pagina: ProveedoresPage },
-  { ruta: '/departamentos', titulo: 'Departamentos', Pagina: DepartamentosPage },
-  { ruta: '/productos', titulo: 'Productos', Pagina: ProductosPage },
+// Menú lateral agrupado por área
+const SECCIONES = [
+  { titulo: null, rutas: [{ ruta: '/', titulo: 'Resumen', Pagina: ResumenPage }] },
+  {
+    titulo: 'Compras',
+    rutas: [
+      { ruta: '/ordenes', titulo: 'Órdenes de compra', Pagina: OrdenesPage },
+      { ruta: '/requisiciones', titulo: 'Requisiciones', Pagina: RequisicionesPage },
+      { ruta: '/cotizaciones', titulo: 'Cotizaciones', Pagina: CotizacionesPage },
+      { ruta: '/recepciones', titulo: 'Recepciones', Pagina: RecepcionesPage },
+    ],
+  },
+  {
+    titulo: 'Cuentas por pagar',
+    rutas: [
+      { ruta: '/facturas', titulo: 'Facturas', Pagina: FacturasPage },
+      { ruta: '/pagos', titulo: 'Pagos', Pagina: PagosPage },
+      { ruta: '/metodos-pago', titulo: 'Métodos de pago', Pagina: MetodosPagoPage },
+    ],
+  },
+  {
+    titulo: 'Catálogos',
+    rutas: [
+      { ruta: '/proveedores', titulo: 'Proveedores', Pagina: ProveedoresPage },
+      { ruta: '/contactos', titulo: 'Contactos', Pagina: ContactosPage },
+      { ruta: '/productos', titulo: 'Productos', Pagina: ProductosPage },
+      { ruta: '/categorias', titulo: 'Categorías', Pagina: CategoriasPage },
+    ],
+  },
+  {
+    titulo: 'Inventario',
+    rutas: [
+      { ruta: '/bodegas', titulo: 'Bodegas', Pagina: BodegasPage },
+      { ruta: '/existencias', titulo: 'Existencias', Pagina: ExistenciasPage },
+    ],
+  },
+  {
+    titulo: 'Organización',
+    rutas: [
+      { ruta: '/departamentos', titulo: 'Departamentos', Pagina: DepartamentosPage },
+      { ruta: '/empleados', titulo: 'Empleados', Pagina: EmpleadosPage },
+    ],
+  },
 ];
+
+const RUTAS = SECCIONES.flatMap((s) => s.rutas);
 
 // Navegación por hash (#/ordenes) sin dependencias extra
 function useRutaActual() {
@@ -47,15 +97,20 @@ export default function App() {
             </span>
           </a>
           <nav aria-label="Secciones">
-            {RUTAS.map((r) => (
-              <a
-                key={r.ruta}
-                href={`#${r.ruta}`}
-                className={`nav-enlace ${r === actual ? 'nav-activo' : ''}`}
-                aria-current={r === actual ? 'page' : undefined}
-              >
-                {r.titulo}
-              </a>
+            {SECCIONES.map((seccion) => (
+              <div key={seccion.titulo ?? 'inicio'} className="nav-grupo">
+                {seccion.titulo && <span className="nav-titulo">{seccion.titulo}</span>}
+                {seccion.rutas.map((r) => (
+                  <a
+                    key={r.ruta}
+                    href={`#${r.ruta}`}
+                    className={`nav-enlace ${r === actual ? 'nav-activo' : ''}`}
+                    aria-current={r === actual ? 'page' : undefined}
+                  >
+                    {r.titulo}
+                  </a>
+                ))}
+              </div>
             ))}
           </nav>
         </aside>

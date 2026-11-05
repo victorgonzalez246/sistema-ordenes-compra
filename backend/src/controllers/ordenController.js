@@ -6,6 +6,8 @@ const {
   Departamento,
   Proveedor,
   Producto,
+  Factura,
+  Recepcion,
 } = require('../models');
 const { HttpError } = require('../middlewares/errorHandler');
 const { datosValidados } = require('../validators/comunes');
@@ -188,6 +190,17 @@ async function eliminar(req, res) {
     throw new HttpError(
       409,
       `No se puede eliminar una orden ${orden.estado}: solo se eliminan órdenes pendientes o anuladas`
+    );
+  }
+
+  const [facturas, recepciones] = await Promise.all([
+    Factura.count({ where: { orden_id: orden.id } }),
+    Recepcion.count({ where: { orden_id: orden.id } }),
+  ]);
+  if (facturas > 0 || recepciones > 0) {
+    throw new HttpError(
+      409,
+      `No se puede eliminar la orden: tiene ${facturas} factura(s) y ${recepciones} recepción(es) registradas`
     );
   }
 

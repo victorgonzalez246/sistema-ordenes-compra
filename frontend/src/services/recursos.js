@@ -16,6 +16,17 @@ function recurso(ruta) {
 }
 
 export const departamentosApi = recurso('departamentos');
+export const empleadosApi = recurso('empleados');
 export const proveedoresApi = recurso('proveedores');
+export const contactosApi = recurso('contactos-proveedor');
+export const categoriasApi = recurso('categorias');
 export const productosApi = recurso('productos');
+export const requisicionesApi = recurso('requisiciones');
+export const cotizacionesApi = recurso('cotizaciones');
 export const ordenesApi = recurso('ordenes');
+export const recepcionesApi = recurso('recepciones');
+export const bodegasApi = recurso('bodegas');
+export const existenciasApi = recurso('existencias');
+export const facturasApi = recurso('facturas');
+export const pagosApi = recurso('pagos');
+export const metodosPagoApi = recurso('metodos-pago');

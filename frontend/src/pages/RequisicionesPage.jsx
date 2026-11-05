@@ -4,6 +4,7 @@ import Insignia from '../components/Insignia';
 import { requisicionesApi } from '../services/recursos';
 import { fuentes } from '../services/fuentes';
 import { dinero, fecha, hoyISO } from '../utils/formato';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   { clave: 'numero', titulo: 'Número', render: (r) => <strong className="sin-corte">{r.numero}</strong> },
@@ -64,6 +65,7 @@ export default function RequisicionesPage() {
       singular="Requisición"
       femenino
       api={requisicionesApi}
+      metricas={metricas.requisiciones}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={['numero', 'descripcion', 'estado', 'prioridad', (r) => r.empleado?.nombre]}

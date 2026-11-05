@@ -11,7 +11,8 @@ Sistema para centralizar el ciclo de compras de una empresa: requisiciones, coti
 
 ## Funcionalidades
 
-- **Resumen:** órdenes pendientes de aprobación, órdenes aprobadas por recibir, gasto comprometido y uso del presupuesto de cada departamento.
+- **Resumen (dashboard):** gasto comprometido frente al presupuesto, 6 indicadores (cuentas por pagar, órdenes por aprobar, requisiciones, productos bajo el mínimo, pagos del mes, proveedores activos), gráficos de gasto por departamento, órdenes por estado, vencimientos de facturas, pagos por mes y compras por proveedor (con tooltip y vista en tabla), y listas de alertas.
+- **Métricas en cada pantalla:** los 15 CRUDs muestran sus propios indicadores arriba de la tabla; por ejemplo, Facturas muestra lo facturado, el saldo por pagar y las facturas vencidas.
 - **Órdenes de compra:** alta con varias líneas de productos, cálculo automático de subtotales y total, filtro por estado y ciclo de aprobación.
 - **15 CRUDs** con búsqueda, formularios de alta y edición, y eliminación con confirmación, agrupados por área:
 

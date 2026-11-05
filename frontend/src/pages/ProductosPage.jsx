@@ -2,6 +2,7 @@ import PaginaCatalogo from '../components/PaginaCatalogo';
 import ProductoForm from '../components/ProductoForm';
 import { productosApi } from '../services/recursos';
 import { dinero } from '../utils/formato';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   { clave: 'codigo', titulo: 'Código', render: (p) => <code>{p.codigo}</code> },
@@ -20,6 +21,7 @@ export default function ProductosPage() {
       descripcion="Catálogo de bienes que se compran, con su unidad y precio de referencia."
       singular="Producto"
       api={productosApi}
+      metricas={metricas.productos}
       columnas={columnas}
       Formulario={ProductoForm}
       camposBusqueda={busqueda}

@@ -4,6 +4,7 @@ import Insignia from '../components/Insignia';
 import { facturasApi } from '../services/recursos';
 import { fuentes } from '../services/fuentes';
 import { dinero, fecha, hoyISO } from '../utils/formato';
+import { metricas } from '../services/metricas';
 
 const vencida = (f) => f.estado === 'pendiente' && f.fecha_vencimiento < hoyISO();
 
@@ -61,6 +62,7 @@ export default function FacturasPage() {
       singular="Factura"
       femenino
       api={facturasApi}
+      metricas={metricas.facturas}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={['numero', 'estado', (f) => f.orden?.numero, (f) => f.orden?.proveedor?.razon_social]}

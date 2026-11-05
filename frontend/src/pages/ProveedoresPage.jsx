@@ -1,6 +1,7 @@
 import PaginaCatalogo from '../components/PaginaCatalogo';
 import ProveedorForm from '../components/ProveedorForm';
 import { proveedoresApi } from '../services/recursos';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   { clave: 'razon_social', titulo: 'Razón social', render: (p) => <strong>{p.razon_social}</strong> },
@@ -27,6 +28,7 @@ export default function ProveedoresPage() {
       descripcion="Empresas a las que se compra. Un proveedor con órdenes no se elimina: márcalo como inactivo."
       singular="Proveedor"
       api={proveedoresApi}
+      metricas={metricas.proveedores}
       columnas={columnas}
       Formulario={ProveedorForm}
       camposBusqueda={busqueda}

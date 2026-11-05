@@ -4,6 +4,7 @@ import { useAvisos } from './Avisos';
 import TablaDatos from './TablaDatos';
 import ConfirmarEliminar from './ConfirmarEliminar';
 import Modal from './Modal';
+import TarjetasMetricas from './TarjetasMetricas';
 
 /**
  * Pantalla CRUD de un catálogo: búsqueda, tabla, alta/edición en modal y
@@ -19,6 +20,7 @@ export default function PaginaCatalogo({
   camposBusqueda,
   nombreDe,
   femenino = false,
+  metricas,
 }) {
   // "Nuevo proveedor" / "Nueva factura", "creado" / "creada"
   const nuevo = femenino ? 'Nueva' : 'Nuevo';
@@ -73,6 +75,9 @@ export default function PaginaCatalogo({
           + {nuevo} {minuscula}
         </button>
       </header>
+
+      {/* Indicadores calculados sobre todos los registros (no solo los filtrados por la búsqueda) */}
+      {metricas && !error && <TarjetasMetricas metricas={metricas(datos)} />}
 
       <div className="tarjeta">
         <div className="barra-herramientas">

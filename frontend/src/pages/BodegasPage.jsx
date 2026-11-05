@@ -3,6 +3,7 @@ import { formularioDe } from '../components/FormularioEntidad';
 import { InsigniaActivo } from '../components/Insignia';
 import { bodegasApi } from '../services/recursos';
 import { fuentes } from '../services/fuentes';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   { clave: 'nombre', titulo: 'Bodega', render: (b) => <strong>{b.nombre}</strong> },
@@ -26,6 +27,7 @@ export default function BodegasPage() {
       singular="Bodega"
       femenino
       api={bodegasApi}
+      metricas={metricas.bodegas}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={['nombre', 'ubicacion', (b) => b.responsable?.nombre]}

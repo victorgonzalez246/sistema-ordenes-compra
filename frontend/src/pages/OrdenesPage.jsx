@@ -7,7 +7,29 @@ import EstadoOrden, { ESTADOS, NOMBRE_ESTADO } from '../components/EstadoOrden';
 import { useAvisos } from '../components/Avisos';
 import { useListado } from '../hooks/useListado';
 import { departamentosApi, ordenesApi, productosApi, proveedoresApi } from '../services/recursos';
-import { dinero, fecha } from '../utils/formato';
+import TarjetasMetricas from '../components/TarjetasMetricas';
+import { dinero, dineroCorto, entero, fecha, sumar } from '../utils/formato';
+
+// Indicadores sobre todas las órdenes, sin importar el filtro de estado
+function metricasOrdenes(todas) {
+  const de = (estado) => todas.filter((o) => o.estado === estado);
+  const pendientes = de('pendiente');
+  const aprobadas = de('aprobada');
+  const comprometidas = [...aprobadas, ...de('recibida')];
+  const activas = todas.filter((o) => o.estado !== 'anulada');
+  return [
+    { titulo: 'Órdenes', valor: entero(todas.length), detalle: `${entero(de('anulada').length)} anulada(s)` },
+    {
+      titulo: 'Por aprobar',
+      valor: entero(pendientes.length),
+      detalle: dinero(sumar(pendientes, 'total')),
+      estado: pendientes.length ? { tono: 'aviso', texto: 'Esperan aprobación' } : { tono: 'bien', texto: 'Nada pendiente' },
+    },
+    { titulo: 'Aprobadas por recibir', valor: entero(aprobadas.length), detalle: dinero(sumar(aprobadas, 'total')) },
+    { titulo: 'Gasto comprometido', valor: dineroCorto(sumar(comprometidas, 'total')), detalle: `${entero(comprometidas.length)} orden(es) aprobadas o recibidas` },
+    { titulo: 'Ticket promedio', valor: dineroCorto(activas.length ? sumar(activas, 'total') / activas.length : 0), detalle: 'por orden no anulada' },
+  ];
+}
 
 const columnas = [
   { clave: 'numero', titulo: 'Número', render: (o) => <strong className="sin-corte">{o.numero}</strong> },
@@ -85,7 +107,13 @@ export default function OrdenesPage() {
       avisar(`Orden ${abierta.numero} actualizada`);
     }
     setAbierta(null);
+    recargarTodo();
+  }
+
+  // Recarga el listado filtrado y las métricas
+  function recargarTodo() {
     recargar();
+    cargarCatalogos().catch((e) => avisar(e.message, 'error'));
   }
 
   async function cambiarEstado(estado) {
@@ -93,7 +121,7 @@ export default function OrdenesPage() {
       await ordenesApi.actualizar(abierta.id, { estado });
       avisar(`Orden ${abierta.numero}: ${NOMBRE_ESTADO[estado].toLowerCase()}`);
       setAbierta(null);
-      recargar();
+      recargarTodo();
     } catch (e) {
       avisar(e.message, 'error');
     }
@@ -103,7 +131,7 @@ export default function OrdenesPage() {
     try {
       await ordenesApi.eliminar(eliminando.id);
       avisar(`Orden ${eliminando.numero} eliminada`);
-      recargar();
+      recargarTodo();
     } catch (e) {
       avisar(e.message, 'error');
     } finally {
@@ -126,6 +154,8 @@ export default function OrdenesPage() {
           + Nueva orden
         </button>
       </header>
+
+      <TarjetasMetricas metricas={metricasOrdenes(todas)} />
 
       <div className="tarjeta">
         <div className="barra-herramientas">

@@ -1,6 +1,7 @@
 import PaginaCatalogo from '../components/PaginaCatalogo';
 import { formularioDe } from '../components/FormularioEntidad';
 import { categoriasApi } from '../services/recursos';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   { clave: 'nombre', titulo: 'Categoría', render: (c) => <strong>{c.nombre}</strong> },
@@ -20,6 +21,7 @@ export default function CategoriasPage() {
       singular="Categoría"
       femenino
       api={categoriasApi}
+      metricas={metricas.categorias}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={['nombre', 'descripcion']}

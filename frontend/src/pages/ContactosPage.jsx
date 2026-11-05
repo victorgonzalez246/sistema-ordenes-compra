@@ -3,6 +3,7 @@ import { formularioDe } from '../components/FormularioEntidad';
 import Insignia from '../components/Insignia';
 import { contactosApi } from '../services/recursos';
 import { fuentes } from '../services/fuentes';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   {
@@ -36,6 +37,7 @@ export default function ContactosPage() {
       descripcion="Personas con las que se trata en cada proveedor. Cada proveedor tiene un solo contacto principal."
       singular="Contacto"
       api={contactosApi}
+      metricas={metricas.contactos}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={['nombre', 'puesto', 'email', 'telefono', (c) => c.proveedor?.razon_social]}

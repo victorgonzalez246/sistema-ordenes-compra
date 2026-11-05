@@ -2,6 +2,7 @@ import PaginaCatalogo from '../components/PaginaCatalogo';
 import { formularioDe } from '../components/FormularioEntidad';
 import { InsigniaActivo } from '../components/Insignia';
 import { metodosPagoApi } from '../services/recursos';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   { clave: 'nombre', titulo: 'Método de pago', render: (m) => <strong>{m.nombre}</strong> },
@@ -22,6 +23,7 @@ export default function MetodosPagoPage() {
       descripcion="Formas de pago a proveedores. Un método con pagos registrados no se elimina: márcalo como inactivo."
       singular="Método de pago"
       api={metodosPagoApi}
+      metricas={metricas.metodosPago}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={['nombre', 'descripcion']}

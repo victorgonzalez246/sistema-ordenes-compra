@@ -2,6 +2,7 @@ import PaginaCatalogo from '../components/PaginaCatalogo';
 import DepartamentoForm from '../components/DepartamentoForm';
 import { departamentosApi } from '../services/recursos';
 import { dinero } from '../utils/formato';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   { clave: 'nombre', titulo: 'Departamento', render: (d) => <strong>{d.nombre}</strong> },
@@ -18,6 +19,7 @@ export default function DepartamentosPage() {
       descripcion="Áreas que solicitan compras, con su centro de costo y presupuesto."
       singular="Departamento"
       api={departamentosApi}
+      metricas={metricas.departamentos}
       columnas={columnas}
       Formulario={DepartamentoForm}
       camposBusqueda={busqueda}

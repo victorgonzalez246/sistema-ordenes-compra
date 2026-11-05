@@ -4,6 +4,7 @@ import EstadoOrden from '../components/EstadoOrden';
 import { recepcionesApi } from '../services/recursos';
 import { fuentes } from '../services/fuentes';
 import { fecha, hoyISO } from '../utils/formato';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   { clave: 'fecha', titulo: 'Fecha', render: (r) => <span className="sin-corte">{fecha(r.fecha)}</span> },
@@ -37,6 +38,7 @@ export default function RecepcionesPage() {
       singular="Recepción"
       femenino
       api={recepcionesApi}
+      metricas={metricas.recepciones}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={[(r) => r.orden?.numero, (r) => r.bodega?.nombre, (r) => r.empleado?.nombre, 'observaciones']}

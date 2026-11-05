@@ -3,6 +3,7 @@ import { formularioDe } from '../components/FormularioEntidad';
 import Insignia from '../components/Insignia';
 import { existenciasApi } from '../services/recursos';
 import { fuentes } from '../services/fuentes';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   {
@@ -50,6 +51,7 @@ export default function ExistenciasPage() {
       singular="Existencia"
       femenino
       api={existenciasApi}
+      metricas={metricas.existencias}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={[(e) => e.producto?.nombre, (e) => e.producto?.codigo, (e) => e.bodega?.nombre]}

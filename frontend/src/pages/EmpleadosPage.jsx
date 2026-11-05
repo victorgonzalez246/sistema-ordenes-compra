@@ -3,6 +3,7 @@ import { formularioDe } from '../components/FormularioEntidad';
 import { InsigniaActivo } from '../components/Insignia';
 import { empleadosApi } from '../services/recursos';
 import { fuentes } from '../services/fuentes';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   {
@@ -38,6 +39,7 @@ export default function EmpleadosPage() {
       descripcion="Personas que solicitan compras y reciben mercancía. Con requisiciones o recepciones no se eliminan: márcalos como inactivos."
       singular="Empleado"
       api={empleadosApi}
+      metricas={metricas.empleados}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={['nombre', 'cedula', 'puesto', 'email', (e) => e.departamento?.nombre]}

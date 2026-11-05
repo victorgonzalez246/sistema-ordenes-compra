@@ -4,6 +4,7 @@ import Insignia from '../components/Insignia';
 import { cotizacionesApi } from '../services/recursos';
 import { fuentes } from '../services/fuentes';
 import { dinero, fecha, hoyISO } from '../utils/formato';
+import { metricas } from '../services/metricas';
 
 const columnas = [
   {
@@ -49,6 +50,7 @@ export default function CotizacionesPage() {
       singular="Cotización"
       femenino
       api={cotizacionesApi}
+      metricas={metricas.cotizaciones}
       columnas={columnas}
       Formulario={Formulario}
       camposBusqueda={[(c) => c.producto?.nombre, (c) => c.producto?.codigo, (c) => c.proveedor?.razon_social]}

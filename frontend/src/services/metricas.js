@@ -141,4 +141,9 @@ export const metricas = {
   },
 
   metodosPago: activos('Métodos de pago'),
+
+  usuarios: (lista) => [
+    { titulo: 'Usuarios', valor: entero(lista.length), detalle: 'cuentas con acceso' },
+    { titulo: 'Creados este mes', valor: entero(contar(lista, (u) => (u.fecha_creacion || '').startsWith(mesActual()))), detalle: 'cuentas nuevas' },
+  ],
 };

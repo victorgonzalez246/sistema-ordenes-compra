@@ -2,7 +2,7 @@
 
 Sistema para centralizar el ciclo de compras de una empresa: requisiciones, cotizaciones, órdenes de compra, recepción en bodegas, facturas de proveedor y pagos, con control del gasto por departamento.
 
-**15 CRUDs completos · 17 tablas · 79 endpoints REST · autenticación con JWT · 18 pantallas en React.**
+**16 CRUDs completos (incluido Usuarios) · 17 tablas · 84 endpoints REST · autenticación con JWT · 19 pantallas en React.**
 
 - **API REST** en Node.js + Express, con MySQL y Sequelize.
 - **Aplicación web** en React + Vite que consume la API.
@@ -12,9 +12,9 @@ Sistema para centralizar el ciclo de compras de una empresa: requisiciones, coti
 ## Funcionalidades
 
 - **Resumen (dashboard):** gasto comprometido frente al presupuesto, 6 indicadores (cuentas por pagar, órdenes por aprobar, requisiciones, productos bajo el mínimo, pagos del mes, proveedores activos), gráficos de gasto por departamento, órdenes por estado, vencimientos de facturas, pagos por mes y compras por proveedor (con tooltip y vista en tabla), y listas de alertas.
-- **Métricas en cada pantalla:** los 15 CRUDs muestran sus propios indicadores arriba de la tabla; por ejemplo, Facturas muestra lo facturado, el saldo por pagar y las facturas vencidas.
+- **Métricas en cada pantalla:** los 16 CRUDs muestran sus propios indicadores arriba de la tabla; por ejemplo, Facturas muestra lo facturado, el saldo por pagar y las facturas vencidas.
 - **Órdenes de compra:** alta con varias líneas de productos, cálculo automático de subtotales y total, filtro por estado y ciclo de aprobación.
-- **15 CRUDs** con búsqueda, formularios de alta y edición, y eliminación con confirmación, agrupados por área:
+- **16 CRUDs** con búsqueda, formularios de alta y edición, y eliminación con confirmación, agrupados por área:
 
 | Área | CRUDs |
 |---|---|
@@ -23,6 +23,7 @@ Sistema para centralizar el ciclo de compras de una empresa: requisiciones, coti
 | Catálogos | Proveedores, Contactos de proveedor, Productos, Categorías |
 | Inventario | Bodegas, Existencias |
 | Organización | Departamentos, Empleados |
+| Seguridad | Usuarios |
 - **Validaciones** en el back end, con mensajes de error que la interfaz muestra junto a cada campo.
 
 ### Reglas de negocio
@@ -59,25 +60,29 @@ Sistema para centralizar el ciclo de compras de una empresa: requisiciones, coti
 ## Estructura
 
 ```
-├── backend/                API REST (Express + Sequelize)
+├── backend/                    API REST (Express + Sequelize)
+│   ├── .env                    Puerto, conexión a MySQL y JWT_SECRET (no se sube; ver .env.example)
 │   ├── src/
-│   │   ├── config/           Conexión a la base de datos
-│   │   ├── models/           Modelos y relaciones
-│   │   ├── controllers/      Lógica de cada recurso
-│   │   ├── routes/           Rutas, montadas bajo /api
-│   │   ├── middlewares/      Validación, 404 y manejo de errores
-│   │   ├── validators/       Reglas de express-validator
-│   │   └── seeders/          Datos de ejemplo
+│   │   ├── config/               db.js (conexión) y auth.js (clave y duración del token)  [nuevo]
+│   │   ├── models/               Una por entidad + Usuario.js  [nuevo]
+│   │   ├── controllers/          Un controlador por entidad + authController.js y usuarioController.js  [nuevo]
+│   │   ├── routes/               Rutas por entidad + authRoutes.js y usuarioRoutes.js  [nuevo]
+│   │   ├── middlewares/          authMiddleware.js (token)  [nuevo], validación, 404 y errores
+│   │   ├── validators/           Reglas de express-validator (incluye authValidator.js)
+│   │   └── seeders/              Datos de ejemplo y usuario de prueba
 │   └── server.js
-├── frontend/               Aplicación React (Vite)
+├── frontend/                   Aplicación React (Vite)
 │   └── src/
-│       ├── components/       Formularios, tablas, modales y avisos
-│       ├── pages/            Una vista por entidad y el resumen
-│       ├── hooks/            Carga de listados y estado de formularios
-│       ├── services/         Llamadas a la API
-│       └── utils/            Formato de montos y fechas
-├── docs/                   Justificación, diagrama ER y evidencias
-└── postman/                Colección de pruebas
+│       ├── components/           Formularios, tablas, gráficos + RutaProtegida.jsx  [nuevo]
+│       ├── context/              AuthContext.jsx: token y usuario actual  [nuevo]
+│       ├── pages/                Login.jsx y Registro.jsx  [nuevo] + una vista por entidad y el resumen
+│       ├── hooks/                Carga de listados y estado de formularios
+│       ├── services/             api.js (envía el token) + un servicio por entidad
+│       └── utils/                Formato de montos y fechas
+├── docs/                       Justificación, diagrama ER, informe del token y evidencias
+├── postman/                    Colección de pruebas
+├── database.sql                Esquema de las 17 tablas (referencia; el servidor las crea solo)
+└── consultas-mysql.sql         Consultas para revisar los datos en MySQL Workbench
 ```
 
 ## Autenticación (día 2)
@@ -150,6 +155,17 @@ npm run dev
 
 Abre `http://localhost:5173`. La URL de la API se configura con `VITE_API_URL` (ver `frontend/.env.example`).
 
+## Ver los datos en vivo en MySQL
+
+La aplicación guarda todo directamente en MySQL: lo que creas, editas o eliminas en la interfaz queda en la base al instante.
+
+1. Abre **MySQL Workbench** y conéctate al mismo servidor del `.env` (`localhost:3306`, usuario `root`).
+2. En el panel **Schemas** abre la base **`ordenes_compra`** (la del `DB_NAME` del `.env`). Si no la ves, haz clic en el botón de actualizar del panel.
+3. Abre `consultas-mysql.sql` (*File → Open SQL Script*) y ejecuta la consulta que quieras con **Ctrl + Enter**, o haz clic derecho en una tabla y elige *Select Rows*.
+4. Haz un cambio en la aplicación (por ejemplo, crea un proveedor) y **vuelve a ejecutar la consulta**: el registro nuevo aparece. Workbench no refresca solo los resultados; hay que ejecutar la consulta otra vez.
+
+Las contraseñas de `usuarios` se ven como un hash de bcrypt (empiezan con `$2b$`), nunca en texto plano.
+
 ## API
 
 Todas las rutas cuelgan de `/api` y responden JSON. Cada recurso tiene las cinco operaciones REST:
@@ -179,8 +195,9 @@ Todas las rutas cuelgan de `/api` y responden JSON. Cada recurso tiene las cinco
 | `facturas` | `numero*` (único), `orden_id*`, `fecha*`, `fecha_vencimiento*`, `monto*`, `estado` (al actualizar: `pendiente` o `anulada`) | `estado`, `orden_id` |
 | `pagos` | `factura_id*`, `metodo_pago_id*`, `fecha*`, `monto*`, `referencia` | `factura_id`, `metodo_pago_id` |
 | `metodos-pago` | `nombre*` (único), `descripcion`, `activo` | — |
+| `usuarios` | `nombre*`, `correo*` (único; repetido → 400), `password*` (mínimo 8, se cifra; al actualizar es opcional). Nunca se devuelve la contraseña; no se puede eliminar la cuenta propia (409) | — |
 
-Las fechas van en formato `AAAA-MM-DD`. Las respuestas incluyen los datos básicos de los registros relacionados (por ejemplo, un empleado trae su `departamento`). `GET /api/ordenes/:id` incluye las líneas con su producto. Además de los 75 endpoints de los CRUDs (todos requieren token), están los 3 de autenticación y `GET /api`, público, que indica si el servicio está activo.
+Las fechas van en formato `AAAA-MM-DD`. Las respuestas incluyen los datos básicos de los registros relacionados (por ejemplo, un empleado trae su `departamento`). `GET /api/ordenes/:id` incluye las líneas con su producto. Además de los 80 endpoints de los 16 CRUDs (todos requieren token), están los 3 de autenticación y `GET /api`, público, que indica si el servicio está activo.
 
 Ejemplo para crear una orden:
 
@@ -223,7 +240,7 @@ Todas las respuestas de error tienen la misma forma:
 
 ## Pruebas
 
-La colección `postman/ordenes-compra.postman_collection.json` cubre la autenticación (registro, login, perfil y los casos 401), los 15 CRUDs, las reglas de negocio y los casos de error. La carpeta **Autenticación** va primero: registra un usuario nuevo, inicia sesión y guarda el token, que el resto de la colección usa automáticamente. Las pruebas crean sus propios registros y los eliminan al final, así que se pueden repetir. Con la API levantada y el seed recién cargado:
+La colección `postman/ordenes-compra.postman_collection.json` cubre la autenticación (registro, login, perfil y los casos 401), los 16 CRUDs (incluido Usuarios), las reglas de negocio y los casos de error. La carpeta **Autenticación** va primero: registra un usuario nuevo, inicia sesión y guarda el token, que el resto de la colección usa automáticamente. Las pruebas crean sus propios registros y los eliminan al final, así que se pueden repetir. Con la API levantada y el seed recién cargado:
 
 ```bash
 postman collection run postman/ordenes-compra.postman_collection.json
@@ -231,7 +248,7 @@ postman collection run postman/ordenes-compra.postman_collection.json
 
 También puede importarse en la aplicación de Postman. La variable `baseUrl` apunta a `http://localhost:3000/api`.
 
-Resultado de la última ejecución (186 peticiones, 440 aserciones, 0 fallos):
+Resultado de la última ejecución (199 peticiones, 470 aserciones, 0 fallos):
 
 ![Resultado de las pruebas con Postman CLI](docs/evidencias/pruebas-postman.png)
 

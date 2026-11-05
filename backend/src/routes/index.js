@@ -39,4 +39,7 @@ router.use('/facturas', require('./facturaRoutes'));
 router.use('/pagos', require('./pagoRoutes'));
 router.use('/metodos-pago', require('./metodoPagoRoutes'));
 
+// Seguridad
+router.use('/usuarios', require('./usuarioRoutes'));
+
 module.exports = router;

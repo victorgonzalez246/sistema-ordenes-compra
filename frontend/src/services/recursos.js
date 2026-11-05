@@ -30,3 +30,4 @@ export const existenciasApi = recurso('existencias');
 export const facturasApi = recurso('facturas');
 export const pagosApi = recurso('pagos');
 export const metodosPagoApi = recurso('metodos-pago');
+export const usuariosApi = recurso('usuarios');

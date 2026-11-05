@@ -14,7 +14,7 @@ import { useFormulario } from '../hooks/useFormulario';
  *
  * Al editar se envían únicamente los campos que cambiaron.
  */
-const TIPO_INPUT = { texto: 'text', email: 'email', tel: 'tel', numero: 'number', dinero: 'number', fecha: 'date' };
+const TIPO_INPUT = { texto: 'text', email: 'email', tel: 'tel', numero: 'number', dinero: 'number', fecha: 'date', password: 'password' };
 
 function valorInicial(campo, inicial) {
   const valor = inicial[campo.nombre];
@@ -82,6 +82,7 @@ export default function FormularioEntidad({ campos, inicial, onGuardar, onCancel
             pattern={campo.patron}
             title={campo.patron ? campo.ayuda : undefined}
             placeholder={campo.placeholder}
+            autoComplete={campo.tipo === 'password' ? 'new-password' : undefined}
           />
         );
     }

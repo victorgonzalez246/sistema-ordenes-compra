@@ -22,6 +22,7 @@ import BodegasPage from './pages/BodegasPage';
 import ExistenciasPage from './pages/ExistenciasPage';
 import DepartamentosPage from './pages/DepartamentosPage';
 import EmpleadosPage from './pages/EmpleadosPage';
+import UsuariosPage from './pages/UsuariosPage';
 
 // Menú lateral agrupado por área
 const SECCIONES = [
@@ -70,6 +71,11 @@ const SECCIONES = [
       { ruta: '/departamentos', titulo: 'Departamentos', icono: 'departamentos', Pagina: DepartamentosPage },
       { ruta: '/empleados', titulo: 'Empleados', icono: 'empleados', Pagina: EmpleadosPage },
     ],
+  },
+  {
+    titulo: 'Seguridad',
+    icono: 'escudo',
+    rutas: [{ ruta: '/usuarios', titulo: 'Usuarios', icono: 'usuarios', Pagina: UsuariosPage }],
   },
 ];
 

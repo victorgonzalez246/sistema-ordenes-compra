@@ -2,14 +2,18 @@
 -- Script SQL para MySQL
 -- Sistema de Órdenes de Compra - mini-proyecto-1
 -- Generado a partir de los modelos Sequelize del proyecto
+--
+-- No es obligatorio ejecutarlo: al arrancar, el servidor crea las tablas
+-- y "npm run seed" las recrea con datos de ejemplo. Sirve como referencia
+-- del esquema o para crear la base a mano. Las tablas se crean vacías.
 -- ============================================================
 
--- Crear la base de datos (ajustar el nombre según tu .env DB_NAME)
-CREATE DATABASE IF NOT EXISTS mini_proyecto_1
+-- Crear la base de datos (debe coincidir con DB_NAME en backend/.env)
+CREATE DATABASE IF NOT EXISTS ordenes_compra
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE mini_proyecto_1;
+USE ordenes_compra;
 
 -- ============================================================
 -- 1. USUARIOS (autenticación)

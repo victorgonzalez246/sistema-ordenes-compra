@@ -16,6 +16,26 @@
     {
       "key": "rifPrueba",
       "value": ""
+    },
+    {
+      "key": "departamentoId",
+      "value": ""
+    },
+    {
+      "key": "productoId",
+      "value": ""
+    },
+    {
+      "key": "codigoPrueba",
+      "value": ""
+    },
+    {
+      "key": "ordenId",
+      "value": ""
+    },
+    {
+      "key": "numeroPrueba",
+      "value": ""
     }
   ],
   "item": [
@@ -538,6 +558,44 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "Eliminar proveedor con órdenes (409)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/proveedores/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "proveedores",
+                    "1"
+                  ]
+                },
+                "description": "El proveedor 1 del seed tiene órdenes asociadas."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Explica que tiene órdenes asociadas\", () => {",
+                      "    pm.expect(pm.response.json().error).to.match(/orden/);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
@@ -605,6 +663,1462 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Departamentos",
+      "item": [
+        {
+          "name": "Crear departamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/departamentos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departamentos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Recursos Humanos\",\n  \"centro_costo\": \"cc-400\",\n  \"presupuesto\": 18500.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function validar(r) {",
+                  "    pm.expect(r).to.include.all.keys(\"id\", \"nombre\", \"centro_costo\", \"presupuesto\", \"created_at\", \"updated_at\");",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "}",
+                  "const r = pm.response.json();",
+                  "if (r && r.id) pm.collectionVariables.set(\"departamentoId\", r.id);",
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el departamento creado\", () => {",
+                  "    validar(r);",
+                  "    pm.expect(r.centro_costo).to.eql(\"CC-400\");",
+                  "    pm.expect(r.presupuesto).to.eql(18500.5);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar departamentos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/departamentos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departamentos"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function validar(r) {",
+                  "    pm.expect(r).to.include.all.keys(\"id\", \"nombre\", \"centro_costo\", \"presupuesto\", \"created_at\", \"updated_at\");",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "}",
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo de departamentos\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista).to.be.an(\"array\").with.length.above(3);",
+                  "    lista.forEach(validar);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener departamento por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/departamentos/{{departamentoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departamentos",
+                "{{departamentoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el departamento solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"departamentoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar departamento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/departamentos/{{departamentoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departamentos",
+                "{{departamentoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"presupuesto\": 21000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Presupuesto actualizado\", () => pm.expect(pm.response.json().presupuesto).to.eql(21000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Errores",
+          "item": [
+            {
+              "name": "Crear sin campos obligatorios (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/departamentos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "departamentos"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Indica nombre y centro de costo\", () => {",
+                      "    const campos = pm.response.json().detalles.map((d) => d.campo);",
+                      "    pm.expect(campos).to.include.members([\"nombre\", \"centro_costo\"]);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Presupuesto negativo (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/departamentos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "departamentos"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Prueba\",\n  \"centro_costo\": \"CC-999\",\n  \"presupuesto\": -10\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Señala el presupuesto\", () => {",
+                      "    pm.expect(pm.response.json().detalles.map((d) => d.campo)).to.include(\"presupuesto\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Eliminar departamento con órdenes (409)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/departamentos/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "departamentos",
+                    "1"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Eliminar departamento",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/departamentos/{{departamentoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departamentos",
+                "{{departamentoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener departamento eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/departamentos/{{departamentoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departamentos",
+                "{{departamentoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"{{codigoPrueba}}\",\n  \"nombre\": \"Tóner láser negro\",\n  \"unidad\": \"unidad\",\n  \"precio_ref\": 62.4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"codigoPrueba\", \"TIN-\" + Math.floor(1000 + Math.random() * 8999));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function validar(r) {",
+                  "    pm.expect(r).to.include.all.keys(\"id\", \"codigo\", \"nombre\", \"unidad\", \"precio_ref\", \"created_at\", \"updated_at\");",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "}",
+                  "const r = pm.response.json();",
+                  "if (r && r.id) pm.collectionVariables.set(\"productoId\", r.id);",
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el producto creado\", () => {",
+                  "    validar(r);",
+                  "    pm.expect(r.codigo).to.eql(pm.collectionVariables.get(\"codigoPrueba\"));",
+                  "    pm.expect(r.precio_ref).to.eql(62.4);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function validar(r) {",
+                  "    pm.expect(r).to.include.all.keys(\"id\", \"codigo\", \"nombre\", \"unidad\", \"precio_ref\", \"created_at\", \"updated_at\");",
+                  "    pm.expect(r.id).to.be.a(\"number\");",
+                  "}",
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo de productos\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista).to.be.an(\"array\").with.length.above(5);",
+                  "    lista.forEach(validar);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener producto por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/{{productoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "{{productoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el producto solicitado\", () => {",
+                  "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"productoId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/productos/{{productoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "{{productoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"precio_ref\": 58.9,\n  \"unidad\": \"caja\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Datos actualizados\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.precio_ref).to.eql(58.9);",
+                  "    pm.expect(r.unidad).to.eql(\"caja\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Errores",
+          "item": [
+            {
+              "name": "Código duplicado (409)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/productos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "productos"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigo\": \"pap-001\",\n  \"nombre\": \"Duplicado\",\n  \"unidad\": \"unidad\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"El mensaje menciona el código\", () => pm.expect(pm.response.json().error).to.match(/código/));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Precio negativo (400)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/productos/{{productoId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{productoId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"precio_ref\": -1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Eliminar producto usado en órdenes (409)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/productos/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "1"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/{{productoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "{{productoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener producto eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/{{productoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "{{productoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Órdenes de compra",
+      "item": [
+        {
+          "name": "Crear orden",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes"
+              ]
+            },
+            "description": "El total y los subtotales los calcula el servidor. Sin precio_unitario se usa el precio de referencia.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"{{numeroPrueba}}\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 2,\n  \"detalles\": [\n    {\n      \"producto_id\": 2,\n      \"cantidad\": 2\n    },\n    {\n      \"producto_id\": 3,\n      \"cantidad\": 3,\n      \"precio_unitario\": 30\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"numeroPrueba\", \"OC-PRUEBA-\" + Math.floor(10000 + Math.random() * 89999));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const r = pm.response.json();",
+                  "if (r && r.id) pm.collectionVariables.set(\"ordenId\", r.id);",
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Se crea pendiente con sus líneas\", () => {",
+                  "    pm.expect(r.estado).to.eql(\"pendiente\");",
+                  "    pm.expect(r.detalles).to.be.an(\"array\").with.lengthOf(2);",
+                  "    pm.expect(r.departamento).to.have.property(\"nombre\");",
+                  "    pm.expect(r.proveedor).to.have.property(\"razon_social\");",
+                  "});",
+                  "pm.test(\"Calcula subtotales y total\", () => {",
+                  "    pm.expect(r.detalles[0].precio_unitario).to.eql(139.9);",
+                  "    pm.expect(r.detalles[0].subtotal).to.eql(279.8);",
+                  "    pm.expect(r.detalles[1].subtotal).to.eql(90);",
+                  "    pm.expect(r.total).to.eql(369.8);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar órdenes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye departamento y proveedor\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista).to.be.an(\"array\").that.is.not.empty;",
+                  "    lista.forEach((o) => pm.expect(o).to.include.all.keys(\"numero\", \"fecha\", \"estado\", \"total\", \"departamento\", \"proveedor\"));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar órdenes pendientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes?estado=pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Todas están pendientes\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista).to.not.be.empty;",
+                  "    lista.forEach((o) => pm.expect(o.estado).to.eql(\"pendiente\"));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener orden con detalle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye las líneas con su producto\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.detalles).to.have.lengthOf(2);",
+                  "    r.detalles.forEach((d) => pm.expect(d.producto).to.include.all.keys(\"codigo\", \"nombre\", \"unidad\"));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reemplazar líneas de la orden",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"detalles\": [\n    {\n      \"producto_id\": 1,\n      \"cantidad\": 10\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Recalcula el total\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.detalles).to.have.lengthOf(1);",
+                  "    pm.expect(r.total).to.eql(45);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aprobar orden",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Queda aprobada\", () => pm.expect(pm.response.json().estado).to.eql(\"aprobada\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reglas y errores",
+          "item": [
+            {
+              "name": "Editar una orden aprobada (409)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "{{ordenId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fecha\": \"2026-11-06\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Volver de aprobada a pendiente (409)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "{{ordenId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": \"pendiente\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Indica los estados permitidos\", () => {",
+                      "    pm.expect(pm.response.json().detalles[0].mensaje).to.match(/recibida, anulada/);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Eliminar una orden aprobada (409)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "{{ordenId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Crear con proveedor inactivo (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"OC-X-1\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 4,\n  \"detalles\": [\n    {\n      \"producto_id\": 1,\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Señala el proveedor\", () => {",
+                      "    const d = pm.response.json().detalles[0];",
+                      "    pm.expect(d.campo).to.eql(\"proveedor_id\");",
+                      "    pm.expect(d.mensaje).to.match(/inactivo/);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Crear sin líneas y con datos inválidos (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"OC-X-2\",\n  \"fecha\": \"2026-13-40\",\n  \"departamento_id\": \"abc\",\n  \"proveedor_id\": 1,\n  \"detalles\": []\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Indica cada campo inválido\", () => {",
+                      "    const campos = pm.response.json().detalles.map((d) => d.campo);",
+                      "    pm.expect(campos).to.include.members([\"fecha\", \"departamento_id\", \"detalles\"]);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Crear con producto inexistente (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"OC-X-3\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 1,\n  \"detalles\": [\n    {\n      \"producto_id\": 999999,\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Señala la línea con el producto\", () => {",
+                      "    pm.expect(pm.response.json().detalles[0].campo).to.eql(\"detalles[0].producto_id\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Cantidad cero (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"OC-X-4\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 1,\n  \"detalles\": [\n    {\n      \"producto_id\": 1,\n      \"cantidad\": 0\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Señala la cantidad de la línea\", () => {",
+                      "    pm.expect(pm.response.json().detalles.map((d) => d.campo)).to.include(\"detalles[0].cantidad\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Anular orden",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"anulada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Queda anulada\", () => pm.expect(pm.response.json().estado).to.eql(\"anulada\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar orden anulada",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener orden eliminada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
-  ]
+  ],
+  "description": "Pruebas de la API de Órdenes de Compra: CRUD de departamentos, proveedores, productos y órdenes, con sus reglas de negocio y respuestas de error. Ejecutar con la base recién cargada con npm run seed."
 }

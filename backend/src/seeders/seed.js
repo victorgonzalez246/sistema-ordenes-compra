@@ -1,5 +1,5 @@
 require('dotenv').config({ quiet: true });
-const { sequelize, Departamento, Proveedor, Producto } = require('../models');
+const { sequelize, Departamento, Proveedor, Producto, OrdenCompra, DetalleOrden } = require('../models');
 
 const departamentos = [
   { nombre: 'Tecnología de la Información', centro_costo: 'CC-100', presupuesto: 85000.0 },
@@ -22,18 +22,60 @@ const productos = [
   { codigo: 'LIM-008', nombre: 'Desinfectante multiuso 3,8 L', unidad: 'galón', precio_ref: 6.2 },
 ];
 
+// Órdenes de ejemplo; los índices apuntan a los arreglos de arriba
+const ordenes = [
+  {
+    numero: 'OC-2026-0001', fecha: '2026-10-06', estado: 'recibida', departamento: 2, proveedor: 0,
+    lineas: [{ producto: 0, cantidad: 20, precio: 4.5 }],
+  },
+  {
+    numero: 'OC-2026-0002', fecha: '2026-10-21', estado: 'aprobada', departamento: 0, proveedor: 1,
+    lineas: [
+      { producto: 1, cantidad: 4, precio: 135.0 },
+      { producto: 2, cantidad: 4, precio: 28.75 },
+    ],
+  },
+  {
+    numero: 'OC-2026-0003', fecha: '2026-11-03', estado: 'pendiente', departamento: 1, proveedor: 2,
+    lineas: [{ producto: 3, cantidad: 150, precio: 0.85 }],
+  },
+];
+
 async function sembrar() {
   try {
     await sequelize.authenticate();
     // Recrea las tablas para partir de datos limpios
     await sequelize.sync({ force: true });
 
-    await Departamento.bulkCreate(departamentos, { validate: true });
-    await Proveedor.bulkCreate(proveedores, { validate: true });
-    await Producto.bulkCreate(productos, { validate: true });
+    const deps = await Departamento.bulkCreate(departamentos, { validate: true });
+    const provs = await Proveedor.bulkCreate(proveedores, { validate: true });
+    const prods = await Producto.bulkCreate(productos, { validate: true });
+
+    for (const o of ordenes) {
+      const detalles = o.lineas.map((l) => ({
+        producto_id: prods[l.producto].id,
+        cantidad: l.cantidad,
+        precio_unitario: l.precio,
+        subtotal: Math.round(l.cantidad * l.precio * 100) / 100,
+      }));
+      const total = Math.round(detalles.reduce((s, d) => s + d.subtotal, 0) * 100) / 100;
+      await OrdenCompra.create(
+        {
+          numero: o.numero,
+          fecha: o.fecha,
+          estado: o.estado,
+          total,
+          departamento_id: deps[o.departamento].id,
+          proveedor_id: provs[o.proveedor].id,
+          detalles,
+        },
+        { include: [{ model: DetalleOrden, as: 'detalles' }] }
+      );
+    }
 
     console.log(
-      `Datos cargados: ${departamentos.length} departamentos, ${proveedores.length} proveedores, ${productos.length} productos`
+      `Datos cargados: ${departamentos.length} departamentos, ${proveedores.length} proveedores, ` +
+        `${productos.length} productos y ${ordenes.length} órdenes de compra`
     );
   } catch (error) {
     console.error('Error al cargar los datos de ejemplo:', error.message);

@@ -2,9 +2,9 @@ require('dotenv').config({ quiet: true });
 const { sequelize, Departamento, Proveedor, Producto, OrdenCompra, DetalleOrden } = require('../models');
 
 const departamentos = [
-  { nombre: 'Tecnología de la Información', centro_costo: 'CC-100', presupuesto: 85000.0 },
-  { nombre: 'Mantenimiento y Servicios Generales', centro_costo: 'CC-200', presupuesto: 42000.0 },
-  { nombre: 'Administración y Finanzas', centro_costo: 'CC-300', presupuesto: 30000.0 },
+  { nombre: 'Tecnología de la Información', centro_costo: 'CC-100', presupuesto: 45000000 },
+  { nombre: 'Mantenimiento y Servicios Generales', centro_costo: 'CC-200', presupuesto: 22000000 },
+  { nombre: 'Administración y Finanzas', centro_costo: 'CC-300', presupuesto: 15000000 },
 ];
 
 const proveedores = [
@@ -15,29 +15,29 @@ const proveedores = [
 ];
 
 const productos = [
-  { codigo: 'PAP-001', nombre: 'Resma de papel bond carta 75 g', unidad: 'resma', precio_ref: 4.5 },
-  { codigo: 'TEC-014', nombre: 'Monitor LED 24 pulgadas Full HD', unidad: 'unidad', precio_ref: 139.9 },
-  { codigo: 'TEC-027', nombre: 'Teclado y ratón inalámbricos', unidad: 'kit', precio_ref: 28.75 },
-  { codigo: 'FER-102', nombre: 'Cable eléctrico THHN 12 AWG', unidad: 'metro', precio_ref: 0.85 },
-  { codigo: 'LIM-008', nombre: 'Desinfectante multiuso 3,8 L', unidad: 'galón', precio_ref: 6.2 },
+  { codigo: 'PAP-001', nombre: 'Resma de papel bond carta 75 g', unidad: 'resma', precio_ref: 2950 },
+  { codigo: 'TEC-014', nombre: 'Monitor LED 24 pulgadas Full HD', unidad: 'unidad', precio_ref: 72500 },
+  { codigo: 'TEC-027', nombre: 'Teclado y ratón inalámbricos', unidad: 'kit', precio_ref: 14900 },
+  { codigo: 'FER-102', nombre: 'Cable eléctrico THHN 12 AWG', unidad: 'metro', precio_ref: 450 },
+  { codigo: 'LIM-008', nombre: 'Desinfectante multiuso 3,8 L', unidad: 'galón', precio_ref: 3200 },
 ];
 
 // Órdenes de ejemplo; los índices apuntan a los arreglos de arriba
 const ordenes = [
   {
     numero: 'OC-2026-0001', fecha: '2026-10-06', estado: 'recibida', departamento: 2, proveedor: 0,
-    lineas: [{ producto: 0, cantidad: 20, precio: 4.5 }],
+    lineas: [{ producto: 0, cantidad: 20, precio: 2950 }],
   },
   {
     numero: 'OC-2026-0002', fecha: '2026-10-21', estado: 'aprobada', departamento: 0, proveedor: 1,
     lineas: [
-      { producto: 1, cantidad: 4, precio: 135.0 },
-      { producto: 2, cantidad: 4, precio: 28.75 },
+      { producto: 1, cantidad: 4, precio: 70000 },
+      { producto: 2, cantidad: 4, precio: 14900 },
     ],
   },
   {
     numero: 'OC-2026-0003', fecha: '2026-11-03', estado: 'pendiente', departamento: 1, proveedor: 2,
-    lineas: [{ producto: 3, cantidad: 150, precio: 0.85 }],
+    lineas: [{ producto: 3, cantidad: 150, precio: 450 }],
   },
 ];
 

@@ -32,7 +32,7 @@ export default function DepartamentoForm({ inicial, onGuardar, onCancelar }) {
           <Campo etiqueta="Centro de costo" requerido error={errores.centro_costo} ayuda="Ejemplo: CC-100">
             <input {...enlazar('centro_costo')} required maxLength={20} />
           </Campo>
-          <Campo etiqueta="Presupuesto ($)" error={errores.presupuesto}>
+          <Campo etiqueta="Presupuesto (₡)" error={errores.presupuesto}>
             <input {...enlazar('presupuesto')} type="number" min="0" step="0.01" inputMode="decimal" />
           </Campo>
         </div>

@@ -688,7 +688,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Recursos Humanos\",\n  \"centro_costo\": \"cc-400\",\n  \"presupuesto\": 18500.5\n}",
+              "raw": "{\n  \"nombre\": \"Recursos Humanos\",\n  \"centro_costo\": \"cc-400\",\n  \"presupuesto\": 9500000.5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -712,7 +712,7 @@
                   "pm.test(\"Devuelve el departamento creado\", () => {",
                   "    validar(r);",
                   "    pm.expect(r.centro_costo).to.eql(\"CC-400\");",
-                  "    pm.expect(r.presupuesto).to.eql(18500.5);",
+                  "    pm.expect(r.presupuesto).to.eql(9500000.5);",
                   "});"
                 ]
               }
@@ -808,7 +808,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"presupuesto\": 21000\n}",
+              "raw": "{\n  \"presupuesto\": 11000000\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -823,7 +823,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Presupuesto actualizado\", () => pm.expect(pm.response.json().presupuesto).to.eql(21000));"
+                  "pm.test(\"Presupuesto actualizado\", () => pm.expect(pm.response.json().presupuesto).to.eql(11000000));"
                 ]
               }
             }
@@ -1057,7 +1057,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"codigo\": \"{{codigoPrueba}}\",\n  \"nombre\": \"Tóner láser negro\",\n  \"unidad\": \"unidad\",\n  \"precio_ref\": 62.4\n}",
+              "raw": "{\n  \"codigo\": \"{{codigoPrueba}}\",\n  \"nombre\": \"Tóner láser negro\",\n  \"unidad\": \"unidad\",\n  \"precio_ref\": 38500\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1090,7 +1090,7 @@
                   "pm.test(\"Devuelve el producto creado\", () => {",
                   "    validar(r);",
                   "    pm.expect(r.codigo).to.eql(pm.collectionVariables.get(\"codigoPrueba\"));",
-                  "    pm.expect(r.precio_ref).to.eql(62.4);",
+                  "    pm.expect(r.precio_ref).to.eql(38500);",
                   "});"
                 ]
               }
@@ -1186,7 +1186,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"precio_ref\": 58.9,\n  \"unidad\": \"caja\"\n}",
+              "raw": "{\n  \"precio_ref\": 36900,\n  \"unidad\": \"caja\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1203,7 +1203,7 @@
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Datos actualizados\", () => {",
                   "    const r = pm.response.json();",
-                  "    pm.expect(r.precio_ref).to.eql(58.9);",
+                  "    pm.expect(r.precio_ref).to.eql(36900);",
                   "    pm.expect(r.unidad).to.eql(\"caja\");",
                   "});"
                 ]
@@ -1435,7 +1435,7 @@
             "description": "El total y los subtotales los calcula el servidor. Sin precio_unitario se usa el precio de referencia.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero\": \"{{numeroPrueba}}\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 2,\n  \"detalles\": [\n    {\n      \"producto_id\": 2,\n      \"cantidad\": 2\n    },\n    {\n      \"producto_id\": 3,\n      \"cantidad\": 3,\n      \"precio_unitario\": 30\n    }\n  ]\n}",
+              "raw": "{\n  \"numero\": \"{{numeroPrueba}}\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 2,\n  \"detalles\": [\n    {\n      \"producto_id\": 2,\n      \"cantidad\": 2\n    },\n    {\n      \"producto_id\": 3,\n      \"cantidad\": 3,\n      \"precio_unitario\": 15000\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1468,10 +1468,10 @@
                   "    pm.expect(r.proveedor).to.have.property(\"razon_social\");",
                   "});",
                   "pm.test(\"Calcula subtotales y total\", () => {",
-                  "    pm.expect(r.detalles[0].precio_unitario).to.eql(139.9);",
-                  "    pm.expect(r.detalles[0].subtotal).to.eql(279.8);",
-                  "    pm.expect(r.detalles[1].subtotal).to.eql(90);",
-                  "    pm.expect(r.total).to.eql(369.8);",
+                  "    pm.expect(r.detalles[0].precio_unitario).to.eql(72500);",
+                  "    pm.expect(r.detalles[0].subtotal).to.eql(145000);",
+                  "    pm.expect(r.detalles[1].subtotal).to.eql(45000);",
+                  "    pm.expect(r.total).to.eql(190000);",
                   "});"
                 ]
               }
@@ -1621,7 +1621,7 @@
                   "pm.test(\"Recalcula el total\", () => {",
                   "    const r = pm.response.json();",
                   "    pm.expect(r.detalles).to.have.lengthOf(1);",
-                  "    pm.expect(r.total).to.eql(45);",
+                  "    pm.expect(r.total).to.eql(29500);",
                   "});"
                 ]
               }

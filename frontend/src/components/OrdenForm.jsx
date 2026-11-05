@@ -214,7 +214,7 @@ export default function OrdenForm({ orden, catalogos, numeroSugerido, onGuardar,
           <div className="linea linea-titulos" aria-hidden="true">
             <span>Producto</span>
             <span>Cantidad</span>
-            <span>Precio unit. ($)</span>
+            <span>Precio unit. (₡)</span>
             <span className="derecha">Subtotal</span>
             <span />
           </div>
@@ -246,7 +246,7 @@ export default function OrdenForm({ orden, catalogos, numeroSugerido, onGuardar,
                     required
                   />
                 </Campo>
-                <Campo etiqueta="Precio unit. ($)" error={error('precio_unitario')}>
+                <Campo etiqueta="Precio unit. (₡)" error={error('precio_unitario')}>
                   <input
                     type="number"
                     min="0"

@@ -7,26 +7,26 @@ postman
 Folder Proveedores
 Sub-folder Crear proveedor
 
-  POST http://localhost:3000/api/proveedores [201 Created, 547 B, 50 ms]
+  POST http://localhost:3000/api/proveedores [201 Created, 547 B, 56 ms]
   Pass  Status 201
   Pass  Devuelve el proveedor creado
 
 Sub-folder Listar proveedores
 
-  GET http://localhost:3000/api/proveedores [200 OK, 1.48 KB, 6 ms]
+  GET http://localhost:3000/api/proveedores [200 OK, 1.48 KB, 11 ms]
   Pass  Status 200
   Pass  Devuelve un arreglo de proveedores
   Pass  Incluye el proveedor recién creado
 
 Sub-folder Obtener proveedor por id
 
-  GET http://localhost:3000/api/proveedores/5 [200 OK, 542 B, 5 ms]
+  GET http://localhost:3000/api/proveedores/5 [200 OK, 542 B, 7 ms]
   Pass  Status 200
   Pass  Devuelve el proveedor solicitado
 
 Sub-folder Actualizar proveedor
 
-  PUT http://localhost:3000/api/proveedores/5 [200 OK, 544 B, 10 ms]
+  PUT http://localhost:3000/api/proveedores/5 [200 OK, 544 B, 12 ms]
   Pass  Status 200
   Pass  Devuelve el proveedor con los cambios
 
@@ -40,27 +40,27 @@ Sub-folder Crear sin campos obligatorios (400)
 
 Sub-folder Crear con email inválido (400)
 
-  POST http://localhost:3000/api/proveedores [400 Bad Request, 450 B, 2 ms]
+  POST http://localhost:3000/api/proveedores [400 Bad Request, 450 B, 5 ms]
   Pass  Status 400
   Pass  Respuesta JSON con formato de error
   Pass  Señala el campo email
 
 Sub-folder Crear con RIF duplicado (409)
 
-  POST http://localhost:3000/api/proveedores [409 Conflict, 430 B, 9 ms]
+  POST http://localhost:3000/api/proveedores [409 Conflict, 430 B, 11 ms]
   Pass  Status 409
   Pass  Respuesta JSON con formato de error
   Pass  El mensaje menciona el RIF
 
 Sub-folder Actualizar con RIF de otro proveedor (409)
 
-  PUT http://localhost:3000/api/proveedores/5 [409 Conflict, 430 B, 10 ms]
+  PUT http://localhost:3000/api/proveedores/5 [409 Conflict, 430 B, 12 ms]
   Pass  Status 409
   Pass  Respuesta JSON con formato de error
 
 Sub-folder Obtener id inexistente (404)
 
-  GET http://localhost:3000/api/proveedores/999999 [404 Not Found, 370 B, 4 ms]
+  GET http://localhost:3000/api/proveedores/999999 [404 Not Found, 370 B, 7 ms]
   Pass  Status 404
   Pass  Respuesta JSON con formato de error
 
@@ -73,13 +73,13 @@ Sub-folder Obtener con id no numérico (400)
 
 Sub-folder Ruta inexistente (404)
 
-  GET http://localhost:3000/api/no-existe [404 Not Found, 372 B, 2 ms]
+  GET http://localhost:3000/api/no-existe [404 Not Found, 372 B, 3 ms]
   Pass  Status 404
   Pass  Respuesta JSON con formato de error
 
 Sub-folder Eliminar proveedor con órdenes (409)
 
-  DELETE http://localhost:3000/api/proveedores/1 [409 Conflict, 503 B, 7 ms]
+  DELETE http://localhost:3000/api/proveedores/1 [409 Conflict, 503 B, 8 ms]
   Pass  Status 409
   Pass  Respuesta JSON con formato de error
   Pass  Explica que tiene órdenes asociadas
@@ -87,45 +87,45 @@ Sub-folder Eliminar proveedor con órdenes (409)
 Folder Proveedores
 Sub-folder Eliminar proveedor
 
-  DELETE http://localhost:3000/api/proveedores/5 [204 No Content, 200 B, 9 ms]
+  DELETE http://localhost:3000/api/proveedores/5 [204 No Content, 200 B, 8 ms]
   Pass  Status 204
   Pass  Sin cuerpo en la respuesta
 
 Sub-folder Obtener proveedor eliminado (404)
 
-  GET http://localhost:3000/api/proveedores/5 [404 Not Found, 365 B, 6 ms]
+  GET http://localhost:3000/api/proveedores/5 [404 Not Found, 365 B, 4 ms]
   Pass  Status 404
   Pass  Respuesta JSON con formato de error
 
 Folder Departamentos
 Sub-folder Crear departamento
 
-  POST http://localhost:3000/api/departamentos [201 Created, 469 B, 8 ms]
+  POST http://localhost:3000/api/departamentos [201 Created, 471 B, 8 ms]
   Pass  Status 201
   Pass  Devuelve el departamento creado
 
 Sub-folder Listar departamentos
 
-  GET http://localhost:3000/api/departamentos [200 OK, 993 B, 6 ms]
+  GET http://localhost:3000/api/departamentos [200 OK, 1004 B, 5 ms]
   Pass  Status 200
   Pass  Devuelve un arreglo de departamentos
 
 Sub-folder Obtener departamento por id
 
-  GET http://localhost:3000/api/departamentos/4 [200 OK, 464 B, 5 ms]
+  GET http://localhost:3000/api/departamentos/4 [200 OK, 466 B, 5 ms]
   Pass  Status 200
   Pass  Es el departamento solicitado
 
 Sub-folder Actualizar departamento
 
-  PUT http://localhost:3000/api/departamentos/4 [200 OK, 462 B, 8 ms]
+  PUT http://localhost:3000/api/departamentos/4 [200 OK, 465 B, 9 ms]
   Pass  Status 200
   Pass  Presupuesto actualizado
 
 Folder Departamentos / Errores
 Sub-folder Crear sin campos obligatorios (400)
 
-  POST http://localhost:3000/api/departamentos [400 Bad Request, 529 B, 2 ms]
+  POST http://localhost:3000/api/departamentos [400 Bad Request, 529 B, 3 ms]
   Pass  Status 400
   Pass  Respuesta JSON con formato de error
   Pass  Indica nombre y centro de costo
@@ -151,14 +151,14 @@ Sub-folder Eliminar departamento
 
 Sub-folder Obtener departamento eliminado (404)
 
-  GET http://localhost:3000/api/departamentos/4 [404 Not Found, 368 B, 5 ms]
+  GET http://localhost:3000/api/departamentos/4 [404 Not Found, 368 B, 4 ms]
   Pass  Status 404
   Pass  Respuesta JSON con formato de error
 
 Folder Productos
 Sub-folder Crear producto
 
-  POST http://localhost:3000/api/productos [201 Created, 482 B, 8 ms]
+  POST http://localhost:3000/api/productos [201 Created, 483 B, 8 ms]
   Pass  Status 201
   Pass  Devuelve el producto creado
 
@@ -170,27 +170,27 @@ Sub-folder Listar productos
 
 Sub-folder Obtener producto por id
 
-  GET http://localhost:3000/api/productos/6 [200 OK, 477 B, 3 ms]
+  GET http://localhost:3000/api/productos/6 [200 OK, 478 B, 4 ms]
   Pass  Status 200
   Pass  Es el producto solicitado
 
 Sub-folder Actualizar producto
 
-  PUT http://localhost:3000/api/productos/6 [200 OK, 475 B, 9 ms]
+  PUT http://localhost:3000/api/productos/6 [200 OK, 476 B, 8 ms]
   Pass  Status 200
   Pass  Datos actualizados
 
 Folder Productos / Errores
 Sub-folder Código duplicado (409)
 
-  POST http://localhost:3000/api/productos [409 Conflict, 439 B, 7 ms]
+  POST http://localhost:3000/api/productos [409 Conflict, 439 B, 6 ms]
   Pass  Status 409
   Pass  Respuesta JSON con formato de error
   Pass  El mensaje menciona el código
 
 Sub-folder Precio negativo (400)
 
-  PUT http://localhost:3000/api/productos/6 [400 Bad Request, 480 B, 3 ms]
+  PUT http://localhost:3000/api/productos/6 [400 Bad Request, 480 B, 4 ms]
   Pass  Status 400
   Pass  Respuesta JSON con formato de error
 
@@ -203,57 +203,57 @@ Sub-folder Eliminar producto usado en órdenes (409)
 Folder Productos
 Sub-folder Eliminar producto
 
-  DELETE http://localhost:3000/api/productos/6 [204 No Content, 200 B, 6 ms]
+  DELETE http://localhost:3000/api/productos/6 [204 No Content, 200 B, 8 ms]
   Pass  Status 204
 
 Sub-folder Obtener producto eliminado (404)
 
-  GET http://localhost:3000/api/productos/6 [404 Not Found, 364 B, 4 ms]
+  GET http://localhost:3000/api/productos/6 [404 Not Found, 364 B, 3 ms]
   Pass  Status 404
   Pass  Respuesta JSON con formato de error
 
 Folder Órdenes de compra
 Sub-folder Crear orden
 
-  POST http://localhost:3000/api/ordenes [201 Created, 1.22 KB, 16 ms]
+  POST http://localhost:3000/api/ordenes [201 Created, 1.22 KB, 28 ms]
   Pass  Status 201
   Pass  Se crea pendiente con sus líneas
   Pass  Calcula subtotales y total
 
 Sub-folder Listar órdenes
 
-  GET http://localhost:3000/api/ordenes [200 OK, 1.83 KB, 5 ms]
+  GET http://localhost:3000/api/ordenes [200 OK, 1.83 KB, 7 ms]
   Pass  Status 200
   Pass  Incluye departamento y proveedor
 
 Sub-folder Filtrar órdenes pendientes
 
-  GET http://localhost:3000/api/ordenes?estado=pendiente [200 OK, 1.07 KB, 7 ms]
+  GET http://localhost:3000/api/ordenes?estado=pendiente [200 OK, 1.07 KB, 4 ms]
   Pass  Status 200
   Pass  Todas están pendientes
 
 Sub-folder Obtener orden con detalle
 
-  GET http://localhost:3000/api/ordenes/4 [200 OK, 1.21 KB, 7 ms]
+  GET http://localhost:3000/api/ordenes/4 [200 OK, 1.22 KB, 6 ms]
   Pass  Status 200
   Pass  Incluye las líneas con su producto
 
 Sub-folder Reemplazar líneas de la orden
 
-  PUT http://localhost:3000/api/ordenes/4 [200 OK, 970 B, 15 ms]
+  PUT http://localhost:3000/api/ordenes/4 [200 OK, 977 B, 17 ms]
   Pass  Status 200
   Pass  Recalcula el total
 
 Sub-folder Aprobar orden
 
-  PUT http://localhost:3000/api/ordenes/4 [200 OK, 969 B, 14 ms]
+  PUT http://localhost:3000/api/ordenes/4 [200 OK, 976 B, 12 ms]
   Pass  Status 200
   Pass  Queda aprobada
 
 Folder Órdenes de compra / Reglas y errores
 Sub-folder Editar una orden aprobada (409)
 
-  PUT http://localhost:3000/api/ordenes/4 [409 Conflict, 416 B, 6 ms]
+  PUT http://localhost:3000/api/ordenes/4 [409 Conflict, 416 B, 5 ms]
   Pass  Status 409
   Pass  Respuesta JSON con formato de error
 
@@ -266,7 +266,7 @@ Sub-folder Volver de aprobada a pendiente (409)
 
 Sub-folder Eliminar una orden aprobada (409)
 
-  DELETE http://localhost:3000/api/ordenes/4 [409 Conflict, 422 B, 5 ms]
+  DELETE http://localhost:3000/api/ordenes/4 [409 Conflict, 422 B, 4 ms]
   Pass  Status 409
   Pass  Respuesta JSON con formato de error
 
@@ -286,14 +286,14 @@ Sub-folder Crear sin líneas y con datos inválidos (400)
 
 Sub-folder Crear con producto inexistente (400)
 
-  POST http://localhost:3000/api/ordenes [400 Bad Request, 459 B, 7 ms]
+  POST http://localhost:3000/api/ordenes [400 Bad Request, 459 B, 6 ms]
   Pass  Status 400
   Pass  Respuesta JSON con formato de error
   Pass  Señala la línea con el producto
 
 Sub-folder Cantidad cero (400)
 
-  POST http://localhost:3000/api/ordenes [400 Bad Request, 471 B, 2 ms]
+  POST http://localhost:3000/api/ordenes [400 Bad Request, 471 B, 4 ms]
   Pass  Status 400
   Pass  Respuesta JSON con formato de error
   Pass  Señala la cantidad de la línea
@@ -301,18 +301,18 @@ Sub-folder Cantidad cero (400)
 Folder Órdenes de compra
 Sub-folder Anular orden
 
-  PUT http://localhost:3000/api/ordenes/4 [200 OK, 968 B, 12 ms]
+  PUT http://localhost:3000/api/ordenes/4 [200 OK, 975 B, 10 ms]
   Pass  Status 200
   Pass  Queda anulada
 
 Sub-folder Eliminar orden anulada
 
-  DELETE http://localhost:3000/api/ordenes/4 [204 No Content, 200 B, 8 ms]
+  DELETE http://localhost:3000/api/ordenes/4 [204 No Content, 200 B, 6 ms]
   Pass  Status 204
 
 Sub-folder Obtener orden eliminada (404)
 
-  GET http://localhost:3000/api/ordenes/4 [404 Not Found, 372 B, 7 ms]
+  GET http://localhost:3000/api/ordenes/4 [404 Not Found, 372 B, 4 ms]
   Pass  Status 404
   Pass  Respuesta JSON con formato de error
 
@@ -329,9 +329,9 @@ Sub-folder Obtener orden eliminada (404)
 --------------------------+-------------------+--------------------
 |              assertions |               108 |                 0 |
 -------------------------------------------------------------------
-| total run duration: 4 s                                         |
+| total run duration: 3.9 s                                       |
 -------------------------------------------------------------------
-| total data received: 14.06 KB (approx)                          |
+| total data received: 14.13 KB (approx)                          |
 -------------------------------------------------------------------
-| average response time: 7 ms [min: 2 ms, max: 50 ms, s.d.: 6 ms] |
+| average response time: 7 ms [min: 3 ms, max: 56 ms, s.d.: 8 ms] |
 -------------------------------------------------------------------

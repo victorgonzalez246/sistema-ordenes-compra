@@ -4,6 +4,7 @@ import EstadoOrden from '../components/EstadoOrden';
 import { departamentosApi, ordenesApi, proveedoresApi } from '../services/recursos';
 import { dinero, fecha } from '../utils/formato';
 
+const porcentaje = (n) => n.toLocaleString('es-CR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const sumar = (lista) => lista.reduce((s, o) => s + Number(o.total), 0);
 
 export default function ResumenPage() {
@@ -114,14 +115,14 @@ export default function ResumenPage() {
                     {d.uso === null ? (
                       <span className="texto-suave">Sin presupuesto</span>
                     ) : (
-                      <div className="medidor" title={`${d.uso.toFixed(1)} %`}>
+                      <div className="medidor" title={`${porcentaje(d.uso)} %`}>
                         <div className="medidor-barra">
                           <div
                             className={`medidor-relleno ${d.uso > 100 ? 'medidor-excedido' : ''}`}
                             style={{ width: `${Math.min(d.uso, 100)}%` }}
                           />
                         </div>
-                        <span>{d.uso.toFixed(1)} %</span>
+                        <span>{porcentaje(d.uso)} %</span>
                       </div>
                     )}
                   </td>

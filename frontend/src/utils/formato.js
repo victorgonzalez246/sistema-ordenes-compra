@@ -1,8 +1,9 @@
-const numero = new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Montos en colones costarricenses: ₡1 234 567,50
+const colones = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' });
 
 export function dinero(valor) {
   if (valor === null || valor === undefined || valor === '') return '—';
-  return `$ ${numero.format(Number(valor))}`;
+  return colones.format(Number(valor));
 }
 
 // "2026-11-05" -> "05/11/2026"

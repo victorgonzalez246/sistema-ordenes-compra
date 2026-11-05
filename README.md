@@ -145,10 +145,12 @@ Ejemplo para crear una orden:
   "proveedor_id": 2,
   "detalles": [
     { "producto_id": 2, "cantidad": 2 },
-    { "producto_id": 3, "cantidad": 3, "precio_unitario": 30 }
+    { "producto_id": 3, "cantidad": 3, "precio_unitario": 15000 }
   ]
 }
 ```
+
+Los montos (`presupuesto`, `precio_ref`, `precio_unitario`, `subtotal`, `total`) están en colones costarricenses (₡) con dos decimales.
 
 Para cambiar el estado se envía solo `{ "estado": "aprobada" }`. Si se envía `detalles` en un `PUT`, las líneas de la orden se reemplazan y el total se recalcula.
 

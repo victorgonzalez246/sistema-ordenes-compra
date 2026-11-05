@@ -44,7 +44,7 @@ export default function ProductoForm({ inicial, onGuardar, onCancelar }) {
           <Campo etiqueta="Nombre" requerido error={errores.nombre} className="ancho-completo">
             <input {...enlazar('nombre')} required maxLength={150} />
           </Campo>
-          <Campo etiqueta="Precio de referencia ($)" error={errores.precio_ref}>
+          <Campo etiqueta="Precio de referencia (₡)" error={errores.precio_ref}>
             <input {...enlazar('precio_ref')} type="number" min="0" step="0.01" inputMode="decimal" />
           </Campo>
         </div>

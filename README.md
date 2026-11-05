@@ -126,6 +126,10 @@ Edita `backend/.env` con tus datos:
 | `DB_PASSWORD` | Contraseña MySQL | |
 | `JWT_SECRET` | Clave para firmar los tokens (mínimo 32 caracteres aleatorios). Genérala con `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` | |
 | `JWT_EXPIRES_IN` | Duración del token | `8h` |
+| `ANTHROPIC_API_KEY` | Clave de la API de Anthropic para el asistente (opcional) | |
+| `ASISTENTE_MODELO` | Modelo del asistente | `claude-opus-5-5` |
+| `LIMITE_ASISTENTE` | Preguntas por minuto por usuario | `10` |
+| `LIMITE_LOGIN` | Intentos de login cada 15 minutos por IP | `30` |
 
 ### 3. Instalar dependencias y cargar datos de ejemplo
 
@@ -188,13 +192,17 @@ La pantalla **Asistente IA** responde preguntas en lenguaje natural sobre los da
 2. Agrégala en `backend/.env`: `ANTHROPIC_API_KEY=tu_clave` (opcional: `ASISTENTE_MODELO`, por defecto `claude-opus-5-5`).
 3. Reinicia el back end. Sin clave, el resto del sistema funciona igual y la pantalla explica cómo configurarlo.
 
-**Costo:** cada pregunta hace entre 3 y 10 llamadas al modelo (el cerebro más los agentes que consulte). Con `claude-opus-5-5` ($4 por millón de tokens de entrada y $20 por millón de salida), una pregunta cuesta aproximadamente entre 5 y 30 centavos de dólar según cuántos agentes participen (estimación; el consumo real se ve en la consola de Anthropic). Los agentes usan esfuerzo bajo y el cerebro esfuerzo medio para contener el gasto.
+**Costo:** cada pregunta hace entre 3 y 10 llamadas al modelo (el cerebro más los agentes que consulte). En las pruebas reales, una pregunta que consultó a los 3 agentes costó unos **US$0.08** (8 llamadas) y una que consultó a uno, unos US$0.07. Para controlarlo:
 
-| Agentes trabajando | Respuesta final |
+- Cada respuesta muestra en pantalla las llamadas, los tokens y el **costo estimado**.
+- Hay un **límite de 10 preguntas por minuto por usuario** (429 si se supera; se configura con `LIMITE_ASISTENTE`).
+- Los agentes usan esfuerzo bajo y el cerebro esfuerzo medio.
+
+El diseño, las decisiones y las pruebas se explican en [docs/asistente-ia.md](docs/asistente-ia.md) (también en [PDF](docs/Asistente_IA.pdf)).
+
+| Agentes trabajando (datos llegando desde MySQL) | Respuesta con tabla y consumo |
 |---|---|
 | ![Agentes trabajando](docs/evidencias/asistente-agentes-trabajando.jpg) | ![Respuesta del asistente](docs/evidencias/asistente-respuesta.jpg) |
-
-> Las capturas se tomaron con un cliente simulado (sin llamar a la API real) para mostrar el flujo; los datos sí son los de MySQL.
 
 ## Ver los datos en vivo en MySQL
 
@@ -281,6 +289,17 @@ Todas las respuestas de error tienen la misma forma:
 
 ## Pruebas
 
+### Pruebas automáticas del asistente
+
+```bash
+cd backend
+npm test
+```
+
+8 pruebas del cerebro y los agentes con un cliente simulado: no llaman a la API de Anthropic, no necesitan clave y no gastan dinero. Sí leen MySQL, así que requieren la base encendida y el seed cargado. Verifican la delegación en paralelo, que cada agente reciba solo sus herramientas, el cálculo del consumo, que la base de datos no cambie, el manejo de errores y rechazos del modelo, el tope de pasos y el límite de uso.
+
+### Colección de Postman
+
 La colección `postman/ordenes-compra.postman_collection.json` cubre la autenticación (registro, login, perfil y los casos 401), los 16 CRUDs (incluido Usuarios), las reglas de negocio y los casos de error. La carpeta **Autenticación** va primero: registra un usuario nuevo, inicia sesión y guarda el token, que el resto de la colección usa automáticamente. Las pruebas crean sus propios registros y los eliminan al final, así que se pueden repetir. Con la API levantada y el seed recién cargado:
 
 ```bash
@@ -311,4 +330,5 @@ La salida completa en texto está en [`docs/evidencias/pruebas-postman.txt`](doc
 - [Diagrama entidad-relación](docs/diagrama-er.md)
 - [Justificación y modelo de datos (PDF)](docs/Ordenes_de_Compra_Justificacion_y_Modelo.pdf)
 - [Informe de investigación sobre el token JWT](docs/informe-token.md) ([PDF](docs/Informe_Token_JWT.pdf))
+- [Asistente con IA: arquitectura, decisiones y pruebas](docs/asistente-ia.md) ([PDF](docs/Asistente_IA.pdf))
 - [Evidencia de pruebas con Postman](docs/evidencias/pruebas-postman.png)

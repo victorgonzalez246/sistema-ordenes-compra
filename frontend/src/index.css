@@ -883,3 +883,19 @@ code { background: rgba(148, 170, 210, 0.12); color: #cfdcf0; }
   .nodo-agente { transition: none; }
   .agente-flotar, .conexion-activa, .nodo-cerebro.pensando .aura, .agente-aura, .asistente-estado.activo, .chat-escribiendo { animation: none; }
 }
+
+/* Tablas y consumo en las respuestas del asistente */
+.md-tabla { overflow-x: auto; margin: 6px 0 10px; border: 1px solid var(--vidrio-borde); border-radius: 10px; }
+.md-tabla table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.md-tabla th, .md-tabla td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--vidrio-linea); white-space: nowrap; }
+.md-tabla th { background: rgba(255, 255, 255, 0.04); color: var(--texto-suave); font-weight: 600; font-size: 12px; }
+.md-tabla tr:last-child td { border-bottom: 0; }
+.md-tabla .derecha { text-align: right; font-variant-numeric: tabular-nums; }
+.md hr { border: 0; border-top: 1px solid var(--vidrio-linea); margin: 8px 0; }
+.chat-consumo { align-self: flex-start; margin-top: -6px; font-size: 11.5px; color: #8193b0; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.chat-consumo strong { color: #a9bad3; font-weight: 600; }.md li.md-nivel-1 { margin-left: 18px; list-style-type: circle; }
+.md li.md-nivel-2 { margin-left: 36px; list-style-type: square; }
+.md li.md-nivel-3 { margin-left: 54px; list-style-type: square; }.md-tabla th, .md-tabla td { white-space: normal; vertical-align: top; }
+.md-tabla .derecha { white-space: nowrap; }
+.chat-asistente:has(.md-tabla) { max-width: 100%; }.asistente { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.2fr); }
+.md-tabla th, .md-tabla td { padding: 6px 8px; }

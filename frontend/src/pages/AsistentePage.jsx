@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { entero } from '../utils/formato';
 import MapaAgentes, { AGENTES_INFO } from '../components/MapaAgentes';
 import TextoMarkdown from '../components/TextoMarkdown';
 import { useListado } from '../hooks/useListado';
@@ -98,6 +99,16 @@ export default function AsistentePage() {
         setMensajes((m) => [...m, { rol: 'asistente', texto: e.texto }]);
         registrar(e.t, null, 'El cerebro redacta la respuesta final');
         break;
+      case 'consumo':
+        // Se agrega a la última respuesta del asistente
+        setMensajes((m) => {
+          const copia = [...m];
+          const ultimo = copia.length - 1;
+          if (ultimo >= 0 && copia[ultimo].rol === 'asistente') copia[ultimo] = { ...copia[ultimo], consumo: e };
+          return copia;
+        });
+        registrar(e.t, null, `Consumo: ${e.llamadas} llamadas al modelo${e.costo_usd != null ? `, ≈ US$${e.costo_usd.toFixed(3)}` : ''}`);
+        break;
       case 'error':
         setCerebro('inactivo');
         setMensajes((m) => [...m, { rol: 'error', texto: e.mensaje }]);
@@ -111,7 +122,11 @@ export default function AsistentePage() {
   async function enviar(pregunta) {
     const limpia = pregunta.trim();
     if (!limpia || trabajando) return;
-    const historial = mensajes.filter((m) => m.rol !== 'error').slice(-10).map(({ rol, texto: t }) => ({ rol, texto: t }));
+    // El servidor admite hasta 4000 caracteres por mensaje del historial
+    const historial = mensajes
+      .filter((m) => m.rol !== 'error')
+      .slice(-10)
+      .map(({ rol, texto: t }) => ({ rol, texto: t.slice(0, 4000) }));
     setMensajes((m) => [...m, { rol: 'usuario', texto: limpia }]);
     setTexto('');
     setEstados(ESTADO_INICIAL());
@@ -200,9 +215,19 @@ export default function AsistentePage() {
               </div>
             )}
             {mensajes.map((m, i) => (
-              <div key={i} className={`chat-burbuja chat-${m.rol}`}>
-                {m.rol === 'asistente' ? <TextoMarkdown texto={m.texto} /> : m.texto}
-              </div>
+              <Fragment key={i}>
+                <div className={`chat-burbuja chat-${m.rol}`}>
+                  {m.rol === 'asistente' ? <TextoMarkdown texto={m.texto} /> : m.texto}
+                </div>
+                {m.consumo && (
+                  <div className="chat-consumo" title="Tokens usados por el cerebro y los agentes para esta respuesta">
+                    <span><strong>{m.consumo.llamadas}</strong> llamadas</span>
+                    <span><strong>{entero(m.consumo.entrada + m.consumo.cache)}</strong> tokens de entrada</span>
+                    <span><strong>{entero(m.consumo.salida)}</strong> de salida</span>
+                    {m.consumo.costo_usd != null && <span>≈ <strong>US${m.consumo.costo_usd.toFixed(3)}</strong></span>}
+                  </div>
+                )}
+              </Fragment>
             ))}
             {trabajando && <div className="chat-burbuja chat-asistente chat-escribiendo">Los agentes están investigando…</div>}
             <div ref={finChat} />

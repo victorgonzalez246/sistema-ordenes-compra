@@ -1,0 +1,610 @@
+{
+  "info": {
+    "name": "Órdenes de Compra API",
+    "description": "Pruebas del recurso Proveedores: operaciones CRUD y respuestas de error.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "proveedorId",
+      "value": ""
+    },
+    {
+      "key": "rifPrueba",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Proveedores",
+      "item": [
+        {
+          "name": "Crear proveedor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedores"
+              ]
+            },
+            "description": "Crea un proveedor con un RIF aleatorio y guarda su id para las siguientes peticiones.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razon_social\": \"Papelería y Suministros El Lápiz, C.A.\",\n  \"rif\": \"{{rifPrueba}}\",\n  \"email\": \"ventas@ellapiz.com\",\n  \"telefono\": \"+58 212-555-0199\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const num = Math.floor(10000000 + Math.random() * 89999999);",
+                  "pm.collectionVariables.set(\"rifPrueba\", \"J-\" + num + \"-\" + Math.floor(Math.random() * 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function validarProveedor(p) {",
+                  "    pm.expect(p).to.include.all.keys(\"id\", \"razon_social\", \"rif\", \"email\", \"telefono\", \"activo\", \"created_at\", \"updated_at\");",
+                  "    pm.expect(p.id).to.be.a(\"number\");",
+                  "    pm.expect(p.razon_social).to.be.a(\"string\");",
+                  "    pm.expect(p.rif).to.be.a(\"string\");",
+                  "    pm.expect(p.email).to.be.a(\"string\");",
+                  "    pm.expect(p.activo).to.be.a(\"boolean\");",
+                  "}",
+                  "const creado = pm.response.json();",
+                  "if (creado && creado.id) pm.collectionVariables.set(\"proveedorId\", creado.id);",
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Devuelve el proveedor creado\", () => {",
+                  "    validarProveedor(creado);",
+                  "    pm.expect(creado.rif).to.eql(pm.collectionVariables.get(\"rifPrueba\"));",
+                  "    pm.expect(creado.activo).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar proveedores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedores"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function validarProveedor(p) {",
+                  "    pm.expect(p).to.include.all.keys(\"id\", \"razon_social\", \"rif\", \"email\", \"telefono\", \"activo\", \"created_at\", \"updated_at\");",
+                  "    pm.expect(p.id).to.be.a(\"number\");",
+                  "    pm.expect(p.razon_social).to.be.a(\"string\");",
+                  "    pm.expect(p.rif).to.be.a(\"string\");",
+                  "    pm.expect(p.email).to.be.a(\"string\");",
+                  "    pm.expect(p.activo).to.be.a(\"boolean\");",
+                  "}",
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve un arreglo de proveedores\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista).to.be.an(\"array\").that.is.not.empty;",
+                  "    lista.forEach(validarProveedor);",
+                  "});",
+                  "pm.test(\"Incluye el proveedor recién creado\", () => {",
+                  "    const id = Number(pm.collectionVariables.get(\"proveedorId\"));",
+                  "    pm.expect(pm.response.json().some((p) => p.id === id)).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener proveedor por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores/{{proveedorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedores",
+                "{{proveedorId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function validarProveedor(p) {",
+                  "    pm.expect(p).to.include.all.keys(\"id\", \"razon_social\", \"rif\", \"email\", \"telefono\", \"activo\", \"created_at\", \"updated_at\");",
+                  "    pm.expect(p.id).to.be.a(\"number\");",
+                  "    pm.expect(p.razon_social).to.be.a(\"string\");",
+                  "    pm.expect(p.rif).to.be.a(\"string\");",
+                  "    pm.expect(p.email).to.be.a(\"string\");",
+                  "    pm.expect(p.activo).to.be.a(\"boolean\");",
+                  "}",
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve el proveedor solicitado\", () => {",
+                  "    const p = pm.response.json();",
+                  "    validarProveedor(p);",
+                  "    pm.expect(p.id).to.eql(Number(pm.collectionVariables.get(\"proveedorId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores/{{proveedorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedores",
+                "{{proveedorId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"compras@ellapiz.com\",\n  \"telefono\": \"+58 212-555-0200\",\n  \"activo\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function validarProveedor(p) {",
+                  "    pm.expect(p).to.include.all.keys(\"id\", \"razon_social\", \"rif\", \"email\", \"telefono\", \"activo\", \"created_at\", \"updated_at\");",
+                  "    pm.expect(p.id).to.be.a(\"number\");",
+                  "    pm.expect(p.razon_social).to.be.a(\"string\");",
+                  "    pm.expect(p.rif).to.be.a(\"string\");",
+                  "    pm.expect(p.email).to.be.a(\"string\");",
+                  "    pm.expect(p.activo).to.be.a(\"boolean\");",
+                  "}",
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve el proveedor con los cambios\", () => {",
+                  "    const p = pm.response.json();",
+                  "    validarProveedor(p);",
+                  "    pm.expect(p.email).to.eql(\"compras@ellapiz.com\");",
+                  "    pm.expect(p.telefono).to.eql(\"+58 212-555-0200\");",
+                  "    pm.expect(p.activo).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Errores",
+          "item": [
+            {
+              "name": "Crear sin campos obligatorios (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/proveedores",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "proveedores"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"telefono\": \"+58 212-555-0000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Indica cada campo obligatorio faltante\", () => {",
+                      "    const campos = pm.response.json().detalles.map((d) => d.campo);",
+                      "    pm.expect(campos).to.include.members([\"razon_social\", \"rif\", \"email\"]);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Crear con email inválido (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/proveedores",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "proveedores"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"razon_social\": \"Proveedor de prueba\",\n  \"rif\": \"J-00000001-0\",\n  \"email\": \"no-es-un-email\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Señala el campo email\", () => {",
+                      "    const campos = pm.response.json().detalles.map((d) => d.campo);",
+                      "    pm.expect(campos).to.include(\"email\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Crear con RIF duplicado (409)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/proveedores",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "proveedores"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"razon_social\": \"Otra razón social, C.A.\",\n  \"rif\": \"{{rifPrueba}}\",\n  \"email\": \"otro@proveedor.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"El mensaje menciona el RIF\", () => {",
+                      "    pm.expect(pm.response.json().error).to.match(/RIF/);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Actualizar con RIF de otro proveedor (409)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/proveedores/{{proveedorId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "proveedores",
+                    "{{proveedorId}}"
+                  ]
+                },
+                "description": "Usa el RIF de un proveedor cargado por el seed.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rif\": \"J-30512874-6\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Obtener id inexistente (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/proveedores/999999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "proveedores",
+                    "999999"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Obtener con id no numérico (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/proveedores/abc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "proveedores",
+                    "abc"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Señala el parámetro id\", () => {",
+                      "    pm.expect(pm.response.json().detalles[0].campo).to.eql(\"id\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Ruta inexistente (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/no-existe",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "no-existe"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                      "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                      "    pm.response.to.be.json;",
+                      "    const r = pm.response.json();",
+                      "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                      "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Eliminar proveedor",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores/{{proveedorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedores",
+                "{{proveedorId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));",
+                  "pm.test(\"Sin cuerpo en la respuesta\", () => pm.expect(pm.response.text()).to.be.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener proveedor eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores/{{proveedorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedores",
+                "{{proveedorId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

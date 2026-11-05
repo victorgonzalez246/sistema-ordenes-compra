@@ -23,10 +23,17 @@ import ExistenciasPage from './pages/ExistenciasPage';
 import DepartamentosPage from './pages/DepartamentosPage';
 import EmpleadosPage from './pages/EmpleadosPage';
 import UsuariosPage from './pages/UsuariosPage';
+import AsistentePage from './pages/AsistentePage';
 
 // Menú lateral agrupado por área
 const SECCIONES = [
-  { titulo: null, rutas: [{ ruta: '/', titulo: 'Resumen', icono: 'resumen', Pagina: ResumenPage }] },
+  {
+    titulo: null,
+    rutas: [
+      { ruta: '/', titulo: 'Resumen', icono: 'resumen', Pagina: ResumenPage },
+      { ruta: '/asistente', titulo: 'Asistente IA', icono: 'cerebro', Pagina: AsistentePage },
+    ],
+  },
   {
     titulo: 'Compras',
     icono: 'carrito',

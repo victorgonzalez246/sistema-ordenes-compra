@@ -42,4 +42,7 @@ router.use('/metodos-pago', require('./metodoPagoRoutes'));
 // Seguridad
 router.use('/usuarios', require('./usuarioRoutes'));
 
+// Asistente con IA (cerebro + agentes)
+router.use('/asistente', require('./asistenteRoutes'));
+
 module.exports = router;

@@ -2,7 +2,7 @@
 
 Sistema para centralizar el ciclo de compras de una empresa: requisiciones, cotizaciones, órdenes de compra, recepción en bodegas, facturas de proveedor y pagos, con control del gasto por departamento.
 
-**16 CRUDs completos (incluido Usuarios) · 17 tablas · 84 endpoints REST · autenticación con JWT · 19 pantallas en React.**
+**16 CRUDs completos (incluido Usuarios) · 17 tablas · 86 endpoints REST · autenticación con JWT · asistente multiagente con IA · 20 pantallas en React.**
 
 - **API REST** en Node.js + Express, con MySQL y Sequelize.
 - **Aplicación web** en React + Vite que consume la API.
@@ -155,6 +155,47 @@ npm run dev
 
 Abre `http://localhost:5173`. La URL de la API se configura con `VITE_API_URL` (ver `frontend/.env.example`).
 
+## Asistente con IA (cerebro + agentes)
+
+La pantalla **Asistente IA** responde preguntas en lenguaje natural sobre los datos del sistema usando **Claude** (modelo `claude-opus-5-5` de Anthropic) con una arquitectura multiagente:
+
+```
+                 ┌──────────────┐
+   pregunta ───▶ │   Cerebro    │ ───▶ respuesta final
+                 └──────┬───────┘
+          delega (en paralelo si la pregunta abarca varias áreas)
+        ┌───────────────┼───────────────┐
+ ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐
+ │   Compras   │ │ Inventario  │ │  Finanzas   │
+ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘
+        └───── consultas de solo lectura ┘
+                        ▼
+                     MySQL
+```
+
+- **Cerebro** (`backend/src/asistente/agentes.js`): recibe la pregunta, decide a qué agentes delegarla y combina sus informes. No toca la base de datos.
+- **Agentes especialistas**: cada uno tiene sus propias herramientas de consulta (`backend/src/asistente/datos.js`):
+  - **Compras:** órdenes, requisiciones, cotizaciones y proveedores.
+  - **Inventario:** existencias bajo el mínimo, bodegas y recepciones.
+  - **Finanzas:** facturas y saldos, pagos y gasto frente al presupuesto.
+- **En vivo:** `POST /api/asistente` transmite cada paso (el cerebro piensa, delega, el agente consulta MySQL, entrega su informe) y la pantalla los muestra en un **mapa animado**: los agentes se desplazan hacia la base de datos al consultar y hacia el cerebro al entregar su informe, con un registro de actividad.
+
+**Seguridad:** las herramientas son de **solo lectura** (los agentes no pueden crear, modificar ni borrar datos); las rutas exigen token; la pregunta y el historial se validan; y las instrucciones de los agentes indican tratar los datos de la base como información, no como órdenes. Está activado el respaldo automático de la API (`fallbacks: "default"`): si el modelo declina una consulta por sus filtros de seguridad, la API la reintenta con otro modelo.
+
+**Configuración:**
+
+1. Crea una clave en [platform.claude.com](https://platform.claude.com) (*Settings → API keys*).
+2. Agrégala en `backend/.env`: `ANTHROPIC_API_KEY=tu_clave` (opcional: `ASISTENTE_MODELO`, por defecto `claude-opus-5-5`).
+3. Reinicia el back end. Sin clave, el resto del sistema funciona igual y la pantalla explica cómo configurarlo.
+
+**Costo:** cada pregunta hace entre 3 y 10 llamadas al modelo (el cerebro más los agentes que consulte). Con `claude-opus-5-5` ($4 por millón de tokens de entrada y $20 por millón de salida), una pregunta cuesta aproximadamente entre 5 y 30 centavos de dólar según cuántos agentes participen (estimación; el consumo real se ve en la consola de Anthropic). Los agentes usan esfuerzo bajo y el cerebro esfuerzo medio para contener el gasto.
+
+| Agentes trabajando | Respuesta final |
+|---|---|
+| ![Agentes trabajando](docs/evidencias/asistente-agentes-trabajando.jpg) | ![Respuesta del asistente](docs/evidencias/asistente-respuesta.jpg) |
+
+> Las capturas se tomaron con un cliente simulado (sin llamar a la API real) para mostrar el flujo; los datos sí son los de MySQL.
+
 ## Ver los datos en vivo en MySQL
 
 La aplicación guarda todo directamente en MySQL: lo que creas, editas o eliminas en la interfaz queda en la base al instante.
@@ -197,7 +238,7 @@ Todas las rutas cuelgan de `/api` y responden JSON. Cada recurso tiene las cinco
 | `metodos-pago` | `nombre*` (único), `descripcion`, `activo` | — |
 | `usuarios` | `nombre*`, `correo*` (único; repetido → 400), `password*` (mínimo 8, se cifra; al actualizar es opcional). Nunca se devuelve la contraseña; no se puede eliminar la cuenta propia (409) | — |
 
-Las fechas van en formato `AAAA-MM-DD`. Las respuestas incluyen los datos básicos de los registros relacionados (por ejemplo, un empleado trae su `departamento`). `GET /api/ordenes/:id` incluye las líneas con su producto. Además de los 80 endpoints de los 16 CRUDs (todos requieren token), están los 3 de autenticación y `GET /api`, público, que indica si el servicio está activo.
+Las fechas van en formato `AAAA-MM-DD`. Las respuestas incluyen los datos básicos de los registros relacionados (por ejemplo, un empleado trae su `departamento`). `GET /api/ordenes/:id` incluye las líneas con su producto. Además de los 80 endpoints de los 16 CRUDs (todos requieren token), están los 3 de autenticación, los 2 del asistente con IA y `GET /api`, público, que indica si el servicio está activo.
 
 Ejemplo para crear una orden:
 
@@ -248,7 +289,7 @@ postman collection run postman/ordenes-compra.postman_collection.json
 
 También puede importarse en la aplicación de Postman. La variable `baseUrl` apunta a `http://localhost:3000/api`.
 
-Resultado de la última ejecución (199 peticiones, 470 aserciones, 0 fallos):
+Resultado de la última ejecución (204 peticiones, 480 aserciones, 0 fallos):
 
 ![Resultado de las pruebas con Postman CLI](docs/evidencias/pruebas-postman.png)
 

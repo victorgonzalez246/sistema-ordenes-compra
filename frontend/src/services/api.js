@@ -19,6 +19,10 @@ export function configurarAutenticacion({ token, noAutorizado }) {
   alNoAutorizado = noAutorizado;
 }
 
+// Para las peticiones que no pasan por apiFetch (por ejemplo, respuestas transmitidas en vivo)
+export const tokenActual = () => leerToken();
+export const avisarNoAutorizado = () => alNoAutorizado();
+
 /**
  * Llamada común a la API. Agrega "Authorization: Bearer <token>" a todas las peticiones,
  * salvo las públicas (login y registro), donde un 401 significa credenciales incorrectas.

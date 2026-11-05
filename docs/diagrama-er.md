@@ -19,7 +19,7 @@ erDiagram
     PROVEEDORES {
         INT id PK
         VARCHAR(150) razon_social "NOT NULL"
-        VARCHAR(20) rif UK "NOT NULL"
+        VARCHAR(20) cedula_juridica UK "NOT NULL, formato 3-101-123456"
         VARCHAR(120) email "NOT NULL, formato email"
         VARCHAR(30) telefono
         BOOLEAN activo "DEFAULT true"

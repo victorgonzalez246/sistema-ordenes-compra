@@ -128,7 +128,7 @@ export default function OrdenForm({ orden, catalogos, numeroSugerido, onGuardar,
             <div><dt>Fecha</dt><dd>{fecha(orden.fecha)}</dd></div>
             <div><dt>Estado</dt><dd><EstadoOrden estado={orden.estado} /></dd></div>
             <div><dt>Departamento</dt><dd>{orden.departamento?.nombre}</dd></div>
-            <div className="ancho-completo"><dt>Proveedor</dt><dd>{orden.proveedor?.razon_social} · {orden.proveedor?.rif}</dd></div>
+            <div className="ancho-completo"><dt>Proveedor</dt><dd>{orden.proveedor?.razon_social} · {orden.proveedor?.cedula_juridica}</dd></div>
           </dl>
           <div className="tabla-contenedor">
             <table className="tabla tabla-compacta">

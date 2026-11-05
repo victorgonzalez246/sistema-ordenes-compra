@@ -4,7 +4,7 @@ import { proveedoresApi } from '../services/recursos';
 
 const columnas = [
   { clave: 'razon_social', titulo: 'Razón social', render: (p) => <strong>{p.razon_social}</strong> },
-  { clave: 'rif', titulo: 'RIF', render: (p) => <span className="sin-corte">{p.rif}</span> },
+  { clave: 'cedula_juridica', titulo: 'Cédula jurídica', render: (p) => <span className="sin-corte">{p.cedula_juridica}</span> },
   { clave: 'email', titulo: 'Email', render: (p) => <a href={`mailto:${p.email}`}>{p.email}</a> },
   { clave: 'telefono', titulo: 'Teléfono', render: (p) => <span className="sin-corte">{p.telefono || '—'}</span> },
   {
@@ -18,7 +18,7 @@ const columnas = [
   },
 ];
 
-const busqueda = ['razon_social', 'rif', 'email', 'telefono'];
+const busqueda = ['razon_social', 'cedula_juridica', 'email', 'telefono'];
 
 export default function ProveedoresPage() {
   return (

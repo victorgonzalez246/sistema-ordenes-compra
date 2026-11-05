@@ -1,12 +1,16 @@
 const { body } = require('express-validator');
 const { idParam, soloCampos, alMenosUnCampo, texto } = require('./comunes');
 
-const CAMPOS = ['razon_social', 'rif', 'email', 'telefono', 'activo'];
+const CAMPOS = ['razon_social', 'cedula_juridica', 'email', 'telefono', 'activo'];
+
+// Cédula jurídica de Costa Rica: 3-101-123456
+const FORMATO_CEDULA = /^\d-\d{3}-\d{6}$/;
 
 function reglas({ opcional }) {
   return [
     texto('razon_social', 'La razón social', 150, { opcional, femenino: true }),
-    texto('rif', 'El RIF', 20, { opcional }).toUpperCase(),
+    texto('cedula_juridica', 'La cédula jurídica', 12, { opcional, femenino: true }).bail()
+      .matches(FORMATO_CEDULA).withMessage('La cédula jurídica debe tener el formato 3-101-123456'),
     texto('email', 'El email', 120, { opcional }).bail()
       .isEmail().withMessage('El email no tiene un formato válido'),
     body('telefono')

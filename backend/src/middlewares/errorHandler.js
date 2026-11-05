@@ -23,7 +23,7 @@ function errorHandler(err, req, res, next) {
     return res.status(err.status).json({ error: err.message, detalles: err.detalles });
   }
 
-  // Valor repetido en un campo único (rif, código, número de orden)
+  // Valor repetido en un campo único (cédula jurídica, código, número de orden)
   if (err instanceof UniqueConstraintError) {
     const detalles = mapearDetalles(err.errors);
     return res.status(409).json({

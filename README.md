@@ -25,7 +25,8 @@ Sistema para centralizar las órdenes de compra de una empresa: departamentos so
 | Solo se eliminan órdenes pendientes o anuladas; sus líneas se borran en cascada | 409 |
 | Un proveedor inactivo no puede recibir órdenes nuevas | 400 |
 | No se elimina un departamento, proveedor o producto que ya forma parte de una orden | 409 |
-| RIF del proveedor, código del producto y número de orden son únicos | 409 |
+| La cédula jurídica del proveedor debe tener el formato `3-101-123456` | 400 |
+| Cédula jurídica del proveedor, código del producto y número de orden son únicos | 409 |
 
 ## Requisitos
 
@@ -129,7 +130,7 @@ Todas las rutas cuelgan de `/api` y responden JSON. Cada recurso tiene las cinco
 | Recurso | Campos (`*` obligatorio al crear) |
 |---|---|
 | `departamentos` | `nombre*`, `centro_costo*`, `presupuesto` |
-| `proveedores` | `razon_social*`, `rif*` (único), `email*`, `telefono`, `activo` (por defecto `true`) |
+| `proveedores` | `razon_social*`, `cedula_juridica*` (única, formato `3-101-123456`), `email*`, `telefono`, `activo` (por defecto `true`) |
 | `productos` | `codigo*` (único), `nombre*`, `unidad*`, `precio_ref` |
 | `ordenes` | `numero*` (único), `fecha*` (AAAA-MM-DD), `departamento_id*`, `proveedor_id*`, `detalles*`, `estado` (solo al actualizar) |
 

@@ -10,11 +10,11 @@ const Proveedor = sequelize.define(
       allowNull: false,
       validate: { notEmpty: { msg: 'La razón social es obligatoria' } },
     },
-    rif: {
+    cedula_juridica: {
       type: DataTypes.STRING(20),
       allowNull: false,
-      unique: { name: 'uq_proveedores_rif', msg: 'Ya existe un proveedor con ese RIF' },
-      validate: { notEmpty: { msg: 'El RIF es obligatorio' } },
+      unique: { name: 'uq_proveedores_cedula_juridica', msg: 'Ya existe un proveedor con esa cédula jurídica' },
+      validate: { notEmpty: { msg: 'La cédula jurídica es obligatoria' } },
     },
     email: {
       type: DataTypes.STRING(120),

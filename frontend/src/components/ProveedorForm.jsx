@@ -6,7 +6,7 @@ import { textoONulo } from '../utils/formato';
 export default function ProveedorForm({ inicial, onGuardar, onCancelar }) {
   const { valores, enlazar, errores, errorGeneral, enviando, enviar } = useFormulario({
     razon_social: inicial.razon_social ?? '',
-    rif: inicial.rif ?? '',
+    cedula_juridica: inicial.cedula_juridica ?? '',
     email: inicial.email ?? '',
     telefono: inicial.telefono ?? '',
     activo: inicial.activo ?? true,
@@ -17,7 +17,7 @@ export default function ProveedorForm({ inicial, onGuardar, onCancelar }) {
     enviar(() =>
       onGuardar({
         razon_social: valores.razon_social.trim(),
-        rif: valores.rif.trim(),
+        cedula_juridica: valores.cedula_juridica.trim(),
         email: valores.email.trim(),
         telefono: textoONulo(valores.telefono),
         activo: valores.activo,
@@ -35,11 +35,11 @@ export default function ProveedorForm({ inicial, onGuardar, onCancelar }) {
           <Campo etiqueta="Razón social" requerido error={errores.razon_social} className="ancho-completo">
             <input {...enlazar('razon_social')} required maxLength={150} autoFocus />
           </Campo>
-          <Campo etiqueta="RIF" requerido error={errores.rif} ayuda="Ejemplo: J-30512874-6">
-            <input {...enlazar('rif')} required maxLength={20} />
+          <Campo etiqueta="Cédula jurídica" requerido error={errores.cedula_juridica} ayuda="Formato: 3-101-123456">
+            <input {...enlazar('cedula_juridica')} required maxLength={12} pattern="[0-9]-[0-9]{3}-[0-9]{6}" title="Formato: 3-101-123456" placeholder="3-101-123456" />
           </Campo>
           <Campo etiqueta="Teléfono" error={errores.telefono}>
-            <input {...enlazar('telefono')} type="tel" maxLength={30} />
+            <input {...enlazar('telefono')} type="tel" maxLength={30} placeholder="+506 2222-3333" />
           </Campo>
           <Campo etiqueta="Email" requerido error={errores.email} className="ancho-completo">
             <input {...enlazar('email')} type="email" required maxLength={120} />

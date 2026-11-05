@@ -19,7 +19,7 @@ En muchas empresas las compras se solicitan por correo electrónico, mensajería
 | Entidad | Propósito |
 |---|---|
 | **Departamento** | Unidad que solicita la compra. Su centro de costo y presupuesto permiten medir el gasto por área. |
-| **Proveedor** | Empresa a la que se compra. El RIF único evita registros duplicados y el campo `activo` permite retirar a un proveedor sin perder su historial. |
+| **Proveedor** | Empresa a la que se compra. La cédula jurídica única evita registros duplicados y el campo `activo` permite retirar a un proveedor sin perder su historial. |
 | **Producto** | Catálogo de bienes que se compran, con unidad de medida y precio de referencia para estimar costos. |
 | **OrdenCompra** | Documento central: une un departamento con un proveedor, tiene un número único, una fecha, un estado y el total de la compra. |
 | **DetalleOrden** | Cada línea de la orden: qué producto, cuántas unidades y a qué precio. Separarla de la orden permite que una compra incluya varios productos. |

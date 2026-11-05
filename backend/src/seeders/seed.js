@@ -8,10 +8,10 @@ const departamentos = [
 ];
 
 const proveedores = [
-  { razon_social: 'Suministros Ofimáticos del Centro, C.A.', rif: 'J-30512874-6', email: 'ventas@sofcentro.com', telefono: '+58 212-555-0142' },
-  { razon_social: 'Tecnología Integral Andina, S.A.', rif: 'J-40128955-1', email: 'comercial@tecandina.com', telefono: '+58 274-555-0198' },
-  { razon_social: 'Ferretería Industrial Los Robles, C.A.', rif: 'J-29874310-3', email: 'pedidos@ferrerobles.com', telefono: '+58 241-555-0110' },
-  { razon_social: 'Distribuidora de Limpieza Clarión, C.A.', rif: 'J-31766402-8', email: 'clientes@clarion.com', telefono: '+58 212-555-0177', activo: false },
+  { razon_social: 'Suministros Ofimáticos del Valle S.A.', cedula_juridica: '3-101-512874', email: 'ventas@sofvalle.co.cr', telefono: '+506 2222-0142' },
+  { razon_social: 'Tecnología Integral Tica S.A.', cedula_juridica: '3-101-128955', email: 'comercial@tecintegral.co.cr', telefono: '+506 2290-0198' },
+  { razon_social: 'Ferretería Industrial Los Robles S.R.L.', cedula_juridica: '3-102-874310', email: 'pedidos@ferrerobles.co.cr', telefono: '+506 2440-0110' },
+  { razon_social: 'Distribuidora de Limpieza Clarión S.A.', cedula_juridica: '3-101-766402', email: 'clientes@clarion.co.cr', telefono: '+506 2551-0177', activo: false },
 ];
 
 const productos = [

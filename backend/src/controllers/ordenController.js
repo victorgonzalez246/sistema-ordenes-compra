@@ -20,7 +20,7 @@ const TRANSICIONES = {
 
 const incluirCabecera = [
   { model: Departamento, as: 'departamento', attributes: ['id', 'nombre', 'centro_costo'] },
-  { model: Proveedor, as: 'proveedor', attributes: ['id', 'razon_social', 'rif'] },
+  { model: Proveedor, as: 'proveedor', attributes: ['id', 'razon_social', 'cedula_juridica'] },
 ];
 
 const incluirCompleto = [

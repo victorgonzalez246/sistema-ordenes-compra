@@ -3,6 +3,7 @@ import Campo from './Campo';
 import PieFormulario from './PieFormulario';
 import EstadoOrden, { NOMBRE_ESTADO, TRANSICIONES } from './EstadoOrden';
 import { useFormulario } from '../hooks/useFormulario';
+import PanelAprobacion, { RegistroAprobacion, sePuedeAprobar } from './PanelAprobacion';
 import { dinero, fecha, hoyISO, numeroONulo } from '../utils/formato';
 
 const ACCION_ESTADO = {
@@ -26,11 +27,13 @@ const subtotalDe = (l) => (Number(l.cantidad) || 0) * (Number(l.precio_unitario)
  * Solo las órdenes pendientes se pueden editar; las demás muestran sus datos
  * y los cambios de estado permitidos.
  */
-export default function OrdenForm({ orden, catalogos, numeroSugerido, onGuardar, onCambiarEstado, onCancelar }) {
+export default function OrdenForm({ orden, catalogos, numeroSugerido, aprobacion, onGuardar, onCambiarEstado, onCancelar }) {
   const { departamentos, proveedores, productos } = catalogos;
   const editable = !orden || orden.estado === 'pendiente';
   const [confirmarAnular, setConfirmarAnular] = useState(false);
   const [cambiandoEstado, setCambiandoEstado] = useState(false);
+  const [acta, setActa] = useState('');
+  const aprobable = sePuedeAprobar(aprobacion, acta);
 
   const { valores, setValores, enlazar, errores, errorGeneral, enviando, enviar } = useFormulario({
     numero: orden?.numero ?? numeroSugerido,
@@ -83,7 +86,7 @@ export default function OrdenForm({ orden, catalogos, numeroSugerido, onGuardar,
   async function cambiarEstado(estado) {
     setCambiandoEstado(true);
     try {
-      await onCambiarEstado(estado);
+      await onCambiarEstado(estado, estado === 'aprobada' && acta.trim() ? { acta_comite: acta.trim() } : {});
     } finally {
       setCambiandoEstado(false);
       setConfirmarAnular(false);
@@ -109,7 +112,8 @@ export default function OrdenForm({ orden, catalogos, numeroSugerido, onGuardar,
             key={estado}
             type="button"
             className={`btn ${ACCION_ESTADO[estado].clase}`}
-            disabled={cambiandoEstado || enviando}
+            disabled={cambiandoEstado || enviando || (estado === 'aprobada' && !aprobable)}
+            title={estado === 'aprobada' && !aprobable ? 'No cumple la matriz de aprobación: revisa los requisitos' : undefined}
             onClick={() => (estado === 'anulada' ? setConfirmarAnular(true) : cambiarEstado(estado))}
           >
             {ACCION_ESTADO[estado].texto}
@@ -153,6 +157,7 @@ export default function OrdenForm({ orden, catalogos, numeroSugerido, onGuardar,
             </table>
           </div>
           <p className="total-orden">Total <strong>{dinero(orden.total)}</strong></p>
+          <RegistroAprobacion orden={orden} />
           {TRANSICIONES[orden.estado].length === 0 && (
             <p className="texto-suave">
               La orden está {NOMBRE_ESTADO[orden.estado].toLowerCase()}; es un estado final y ya no admite cambios.
@@ -173,6 +178,7 @@ export default function OrdenForm({ orden, catalogos, numeroSugerido, onGuardar,
     <form onSubmit={alEnviar}>
       <div className="modal-cuerpo">
         {errorGeneral && <div className="alerta alerta-error">{errorGeneral}</div>}
+        {orden && <PanelAprobacion aprobacion={aprobacion} acta={acta} onActa={setActa} />}
 
         <div className="rejilla-form rejilla-4">
           <Campo etiqueta="Número" requerido error={errores.numero}>

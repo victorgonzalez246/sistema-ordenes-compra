@@ -33,6 +33,9 @@ router.use('/recepciones', require('./recepcionRoutes'));
 // Inventario
 router.use('/bodegas', require('./bodegaRoutes'));
 router.use('/existencias', require('./existenciaRoutes'));
+router.use('/movimientos', require('./movimientoRoutes'));
+router.use('/alertas', require('./alertaRoutes'));
+router.use('/tareas', require('./tareaRoutes'));
 
 // Cuentas por pagar
 router.use('/facturas', require('./facturaRoutes'));

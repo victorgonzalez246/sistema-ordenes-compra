@@ -1,8 +1,8 @@
 const { body, query } = require('express-validator');
-const { idParam, soloCampos, alMenosUnCampo, texto } = require('./comunes');
+const { idParam, soloCampos, alMenosUnCampo, texto, textoOpcional } = require('./comunes');
 const { ESTADOS } = require('../models/OrdenCompra');
 
-const CAMPOS = ['numero', 'fecha', 'estado', 'departamento_id', 'proveedor_id', 'detalles'];
+const CAMPOS = ['numero', 'fecha', 'estado', 'departamento_id', 'proveedor_id', 'detalles', 'acta_comite'];
 
 function idReferencia(nombre, etiqueta, { opcional }) {
   const regla = opcional ? body(nombre).optional() : body(nombre);
@@ -40,7 +40,7 @@ function reglas({ opcional }) {
 }
 
 const crearOrden = [
-  soloCampos(CAMPOS),
+  soloCampos(CAMPOS.filter((c) => c !== 'acta_comite')),
   ...reglas({ opcional: false }),
   body('estado')
     .optional()
@@ -55,6 +55,8 @@ const actualizarOrden = [
   body('estado')
     .optional()
     .isIn(ESTADOS).withMessage(`El estado debe ser uno de: ${ESTADOS.join(', ')}`),
+  // Solo se pide al aprobar órdenes de más de ₡10 000 000
+  textoOpcional('acta_comite', 'El número de acta del comité', 40),
 ];
 
 const filtrosOrden = [

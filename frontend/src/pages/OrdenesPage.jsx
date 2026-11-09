@@ -9,6 +9,7 @@ import { useListado } from '../hooks/useListado';
 import { departamentosApi, ordenesApi, productosApi, proveedoresApi } from '../services/recursos';
 import TarjetasMetricas from '../components/TarjetasMetricas';
 import { dinero, dineroCorto, entero, fecha, sumar } from '../utils/formato';
+import { apiFetch } from '../services/api';
 
 // Indicadores sobre todas las órdenes, sin importar el filtro de estado
 function metricasOrdenes(todas) {
@@ -60,6 +61,7 @@ export default function OrdenesPage() {
   const [catalogos, setCatalogos] = useState(null);
   const [todas, setTodas] = useState([]);
   const [abierta, setAbierta] = useState(null); // null · { nueva: true } · orden completa
+  const [aprobacion, setAprobacion] = useState(null); // requisitos de la matriz para la orden abierta
   const [eliminando, setEliminando] = useState(null);
   const avisar = useAvisos();
 
@@ -91,7 +93,13 @@ export default function OrdenesPage() {
 
   async function abrir(fila) {
     try {
-      const [orden] = await Promise.all([ordenesApi.obtener(fila.id), cargarCatalogos()]);
+      const [orden, evaluacion] = await Promise.all([
+        ordenesApi.obtener(fila.id),
+        // Solo una orden pendiente se aprueba: se consulta qué pide la matriz para ella
+        fila.estado === 'pendiente' ? apiFetch(`/ordenes/${fila.id}/aprobacion`) : null,
+        cargarCatalogos(),
+      ]);
+      setAprobacion(evaluacion);
       setAbierta(orden);
     } catch (e) {
       avisar(e.message, 'error');
@@ -116,9 +124,9 @@ export default function OrdenesPage() {
     cargarCatalogos().catch((e) => avisar(e.message, 'error'));
   }
 
-  async function cambiarEstado(estado) {
+  async function cambiarEstado(estado, extra = {}) {
     try {
-      await ordenesApi.actualizar(abierta.id, { estado });
+      await ordenesApi.actualizar(abierta.id, { estado, ...extra });
       avisar(`Orden ${abierta.numero}: ${NOMBRE_ESTADO[estado].toLowerCase()}`);
       setAbierta(null);
       recargarTodo();
@@ -147,7 +155,8 @@ export default function OrdenesPage() {
         <div>
           <h1>Órdenes de compra</h1>
           <p className="texto-suave">
-            Cada orden une un departamento con un proveedor. Solo las pendientes se pueden editar.
+            Cada orden une un departamento con un proveedor. Solo las pendientes se pueden editar, y cada una la aprueba el rol
+            que indica la matriz de aprobación según su monto.
           </p>
         </div>
         <button type="button" className="btn btn-primario" onClick={abrirNueva}>
@@ -213,6 +222,7 @@ export default function OrdenesPage() {
             orden={abierta.nueva ? null : abierta}
             catalogos={catalogos}
             numeroSugerido={siguienteNumero(todas)}
+            aprobacion={abierta.nueva ? null : aprobacion}
             onGuardar={guardar}
             onCambiarEstado={cambiarEstado}
             onCancelar={() => setAbierta(null)}

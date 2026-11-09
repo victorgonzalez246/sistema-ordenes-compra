@@ -156,6 +156,18 @@
     {
       "key": "crudPassword",
       "value": ""
+    },
+    {
+      "key": "tokenSolicitante",
+      "value": ""
+    },
+    {
+      "key": "oc1070Id",
+      "value": ""
+    },
+    {
+      "key": "movimientoId",
+      "value": ""
     }
   ],
   "item": [
@@ -465,6 +477,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Una cuenta nueva entra como solicitante (no aprueba órdenes)\", () => {",
+                  "    pm.expect(pm.response.json().usuario.rol).to.eql(\"solicitante\");",
+                  "});",
                   "pm.test(\"La respuesta no incluye la contraseña\", () => {",
                   "    const u = pm.response.json().usuario || pm.response.json();",
                   "    pm.expect(u).to.not.have.property(\"password\");",
@@ -475,6 +490,8 @@
                   "    pm.expect(r.token.split(\".\")).to.have.lengthOf(3);",
                   "    pm.expect(r.usuario.correo).to.eql(pm.collectionVariables.get(\"usuarioCorreo\"));",
                   "    pm.collectionVariables.set(\"token\", r.token);",
+                  "    // Se guarda aparte para probar lo que un solicitante NO puede hacer",
+                  "    pm.collectionVariables.set(\"tokenSolicitante\", r.token);",
                   "});",
                   "pm.test(\"El token vence y su payload no lleva datos sensibles\", () => {",
                   "    const payload = JSON.parse(atob(pm.response.json().token.split(\".\")[1].replace(/-/g, \"+\").replace(/_/g, \"/\")));",
@@ -515,6 +532,57 @@
                   "    pm.expect(u).to.not.have.property(\"password\");",
                   "});",
                   "pm.test(\"Es el usuario del token\", () => pm.expect(pm.response.json().correo).to.eql(pm.collectionVariables.get(\"usuarioCorreo\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Iniciar sesión como Gerencia General (cuenta del seed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@empresa.co.cr\",\n  \"password\": \"Compras2026!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Tiene el rol más alto de la matriz de aprobación\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.usuario.rol).to.eql(\"gerencia_general\");",
+                  "    // El resto de la colección aprueba órdenes: corre con este token",
+                  "    pm.collectionVariables.set(\"token\", r.token);",
+                  "});"
                 ]
               }
             }
@@ -1028,6 +1096,155 @@
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"No incluye la contraseña\", () => pm.expect(pm.response.json()).to.not.have.property(\"password\"));",
                   "pm.test(\"Nombre actualizado\", () => pm.expect(pm.response.json().nombre).to.eql(\"Analista de Compras\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Asignar rol sin ser Gerencia General (403)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioCrudId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioCrudId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol\": \"gerencia_general\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSolicitante}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/Gerencia General/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Asignar rol y departamento (Gerencia General)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioCrudId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioCrudId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol\": \"jefatura_compras\",\n  \"departamento_id\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Rol y departamento asignados\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.rol).to.eql(\"jefatura_compras\");",
+                  "    pm.expect(r.departamento).to.have.property(\"nombre\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cambiar mi propio rol (409)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioActualId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioActualId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol\": \"solicitante\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"El mensaje lo explica\", () => pm.expect(pm.response.json().error).to.match(/propio rol/));"
                 ]
               }
             }
@@ -1796,7 +2013,7 @@
                 "description": "Usa la cédula jurídica de un proveedor cargado por el seed.",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"cedula_juridica\": \"3-101-512874\"\n}",
+                  "raw": "{\n  \"cedula_juridica\": \"3-101-410221\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2602,7 +2819,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"codigo\": \"pap-001\",\n  \"nombre\": \"Duplicado\",\n  \"unidad\": \"unidad\"\n}",
+                  "raw": "{\n  \"codigo\": \"mat-cem-001\",\n  \"nombre\": \"Duplicado\",\n  \"unidad\": \"unidad\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2835,10 +3052,10 @@
                   "    pm.expect(r.proveedor).to.have.property(\"razon_social\");",
                   "});",
                   "pm.test(\"Calcula subtotales y total\", () => {",
-                  "    pm.expect(r.detalles[0].precio_unitario).to.eql(72500);",
-                  "    pm.expect(r.detalles[0].subtotal).to.eql(145000);",
+                  "    pm.expect(r.detalles[0].precio_unitario).to.eql(2050);",
+                  "    pm.expect(r.detalles[0].subtotal).to.eql(4100);",
                   "    pm.expect(r.detalles[1].subtotal).to.eql(45000);",
-                  "    pm.expect(r.total).to.eql(190000);",
+                  "    pm.expect(r.total).to.eql(49100);",
                   "});"
                 ]
               }
@@ -2988,8 +3205,104 @@
                   "pm.test(\"Recalcula el total\", () => {",
                   "    const r = pm.response.json();",
                   "    pm.expect(r.detalles).to.have.lengthOf(1);",
-                  "    pm.expect(r.total).to.eql(29500);",
+                  "    pm.expect(r.total).to.eql(63000);",
                   "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar la matriz de aprobación de la orden",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenId}}/aprobacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenId}}",
+                "aprobacion"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"₡63 000: la aprueba la jefatura del área con 1 cotización\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.monto_orden).to.eql(63000);",
+                  "    pm.expect(r.requerido.rol).to.eql(\"jefatura_area\");",
+                  "    pm.expect(r.requerido.cotizaciones).to.eql(1);",
+                  "    pm.expect(r.cotizaciones[0].cumple).to.be.true;",
+                  "    pm.expect(r.usuario.puede_aprobar).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aprobar como solicitante (403)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{ordenId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{ordenId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenSolicitante}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Indica qué rol la aprueba\", () => pm.expect(pm.response.json().error).to.match(/Jefatura del área/));"
                 ]
               }
             }
@@ -3032,7 +3345,149 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Queda aprobada\", () => pm.expect(pm.response.json().estado).to.eql(\"aprobada\"));"
+                  "pm.test(\"Queda aprobada\", () => pm.expect(pm.response.json().estado).to.eql(\"aprobada\"));",
+                  "pm.test(\"Registra quién aprobó, con qué monto y nivel\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.aprobada_por.rol).to.eql(\"gerencia_general\");",
+                  "    pm.expect(r.aprobada_en).to.be.a(\"string\");",
+                  "    pm.expect(r.monto_evaluado).to.eql(63000);",
+                  "    pm.expect(r.nivel_aprobacion).to.eql(\"jefatura_area\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar OC-1070 (pendiente del seed)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes?estado=pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"OC-1070 sigue pendiente\", () => {",
+                  "    const oc = pm.response.json().find((o) => o.numero === \"OC-1070\");",
+                  "    pm.expect(oc, \"OC-1070\").to.exist;",
+                  "    pm.collectionVariables.set(\"oc1070Id\", oc.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fraccionamiento: OC-1070 suma con OC-1061",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{oc1070Id}}/aprobacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{oc1070Id}}",
+                "aprobacion"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Sola la aprobaría Compras, pero suma ₡3 150 000 y sube a Gerencia Financiera\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.monto_orden).to.eql(1260000);",
+                  "    pm.expect(r.monto_evaluado).to.eql(3150000);",
+                  "    pm.expect(r.fraccionamiento).to.be.true;",
+                  "    pm.expect(r.nivel_por_monto.rol).to.eql(\"jefatura_compras\");",
+                  "    pm.expect(r.requerido.rol).to.eql(\"gerencia_financiera\");",
+                  "    pm.expect(r.ordenes_relacionadas.map((o) => o.numero)).to.include(\"OC-1061\");",
+                  "});",
+                  "pm.test(\"Faltan cotizaciones: tiene 1 de 3\", () => {",
+                  "    const c = pm.response.json().cotizaciones[0];",
+                  "    pm.expect(c.tiene).to.eql(1);",
+                  "    pm.expect(c.requeridas).to.eql(3);",
+                  "    pm.expect(c.cumple).to.be.false;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aprobar OC-1070 sin las cotizaciones requeridas (409)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/{{oc1070Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "{{oc1070Id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Señala las cotizaciones\", () => {",
+                  "    const d = pm.response.json().detalles[0];",
+                  "    pm.expect(d.campo).to.eql(\"cotizaciones\");",
+                  "    pm.expect(d.mensaje).to.match(/se requieren 3/);",
+                  "});"
                 ]
               }
             }
@@ -3195,7 +3650,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"numero\": \"OC-X-1\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 4,\n  \"detalles\": [\n    {\n      \"producto_id\": 1,\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "raw": "{\n  \"numero\": \"OC-X-1\",\n  \"fecha\": \"2026-11-05\",\n  \"departamento_id\": 1,\n  \"proveedor_id\": 6,\n  \"detalles\": [\n    {\n      \"producto_id\": 1,\n      \"cantidad\": 1\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3484,7 +3939,8 @@
             }
           ]
         }
-      ]
+      ],
+      "description": "CRUD de órdenes y matriz de aprobación (A1): quién aprueba según el monto, cotizaciones requeridas y control de fraccionamiento."
     },
     {
       "name": "Categorías",
@@ -5618,7 +6074,7 @@
             "description": "El proveedor 4 del seed está inactivo.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"proveedor_id\": 4,\n  \"producto_id\": 1,\n  \"fecha\": \"2026-11-05\",\n  \"vigencia_hasta\": \"2026-12-05\",\n  \"precio\": 2800,\n  \"dias_entrega\": 4\n}",
+              "raw": "{\n  \"proveedor_id\": 6,\n  \"producto_id\": 1,\n  \"fecha\": \"2026-11-05\",\n  \"vigencia_hasta\": \"2026-12-05\",\n  \"precio\": 2800,\n  \"dias_entrega\": 4\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5766,7 +6222,7 @@
     },
     {
       "name": "Existencias",
-      "description": "CRUD de existencias: un producto aparece una sola vez por bodega.",
+      "description": "Existencias por bodega: la cantidad la calculan los movimientos; aquí solo se crea la fila y se define el mínimo.",
       "item": [
         {
           "name": "Crear existencia",
@@ -5789,7 +6245,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"producto_id\": 1,\n  \"bodega_id\": {{bodegaId}},\n  \"cantidad\": 40,\n  \"minimo\": 10\n}",
+              "raw": "{\n  \"producto_id\": 1,\n  \"bodega_id\": {{bodegaId}},\n  \"minimo\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5809,6 +6265,7 @@
                   "    pm.expect(r.id).to.be.a(\"number\");",
                   "    pm.collectionVariables.set(\"existenciaId\", r.id);",
                   "});",
+                  "pm.test(\"Sin movimientos, arranca en 0\", () => pm.expect(pm.response.json().cantidad).to.eql(0));",
                   "pm.test(\"Incluye la bodega\", () => {",
                   "    const r = pm.response.json();",
                   "    pm.expect(r.bodega.id).to.eql(Number(pm.collectionVariables.get(\"bodegaId\")));",
@@ -5893,7 +6350,54 @@
           ]
         },
         {
-          "name": "Actualizar existencia",
+          "name": "Actualizar el mínimo de la existencia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/existencias/{{existenciaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "existencias",
+                "{{existenciaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minimo\": 15\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Mínimo actualizado, cantidad intacta\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.minimo).to.eql(15);",
+                  "    pm.expect(r.cantidad).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Digitar la cantidad a mano (400)",
           "request": {
             "method": "PUT",
             "header": [
@@ -5928,10 +6432,17 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Cantidad actualizada\", () => {",
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
                   "    const r = pm.response.json();",
-                  "    pm.expect(r.cantidad).to.eql(25);",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Explica que la cantidad sale de los movimientos\", () => {",
+                  "    const d = pm.response.json().detalles.find((x) => x.campo === \"cantidad\");",
+                  "    pm.expect(d, \"detalle de cantidad\").to.exist;",
+                  "    pm.expect(d.mensaje).to.match(/movimientos/);",
                   "});"
                 ]
               }
@@ -5959,7 +6470,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"producto_id\": 1,\n  \"bodega_id\": {{bodegaId}},\n  \"cantidad\": 5\n}",
+              "raw": "{\n  \"producto_id\": 1,\n  \"bodega_id\": {{bodegaId}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5987,7 +6498,7 @@
           ]
         },
         {
-          "name": "Cantidad negativa (400)",
+          "name": "Crear con cantidad digitada (400)",
           "request": {
             "method": "POST",
             "header": [
@@ -6441,7 +6952,7 @@
             "description": "El empleado 6 del seed está inactivo.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero\": \"REQ-T-INACTIVO\",\n  \"fecha\": \"2026-11-05\",\n  \"empleado_id\": 6,\n  \"descripcion\": \"Sillas para la sala de reuniones\",\n  \"prioridad\": \"alta\",\n  \"monto_estimado\": 510000\n}",
+              "raw": "{\n  \"numero\": \"REQ-T-INACTIVO\",\n  \"fecha\": \"2026-11-05\",\n  \"empleado_id\": 7,\n  \"descripcion\": \"Sillas para la sala de reuniones\",\n  \"prioridad\": \"alta\",\n  \"monto_estimado\": 510000\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6835,7 +7346,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"orden_id\": {{ordenPruebaId}},\n  \"bodega_id\": {{bodegaId}},\n  \"empleado_id\": {{empleadoId}},\n  \"fecha\": \"2026-11-06\",\n  \"observaciones\": \"Entrega parcial: 6 de 10 resmas\"\n}",
+              "raw": "{\n  \"orden_id\": {{ordenPruebaId}},\n  \"bodega_id\": {{bodegaId}},\n  \"empleado_id\": {{empleadoId}},\n  \"fecha\": \"2026-11-06\",\n  \"observaciones\": \"Entrega parcial: 6 de 10 sacos\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -8279,6 +8790,781 @@
                   "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
                   "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
                   "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Inventario: movimientos, reorden, duplicados y trazabilidad",
+      "description": "Quiz #2, opción 2. Usa los datos del seed (Constructora Del Valle). Los movimientos no se borran: las pruebas que mueven stock lo devuelven con un ajuste, así el saldo queda igual.",
+      "item": [
+        {
+          "name": "Stock del cemento (ejercicio A5)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/1/stock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "1",
+                "stock"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"190 sacos, SS 45, PR 165: no hay que reponer\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.stock).to.eql(190);",
+                  "    pm.expect(r.stock_seguridad).to.eql(45);",
+                  "    pm.expect(r.punto_reorden).to.eql(165);",
+                  "    pm.expect(r.estado).to.eql(\"ok\");",
+                  "});",
+                  "pm.test(\"El total es la suma de las bodegas\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.por_bodega.reduce((s, b) => s + b.cantidad, 0)).to.eql(r.stock);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Materiales por reponer hoy (A5)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alertas/reorden",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas",
+                "reorden"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Arena y block están por reponer; cemento y varilla no\", () => {",
+                  "    const codigos = pm.response.json().map((f) => f.codigo);",
+                  "    pm.expect(codigos).to.include.members([\"MAT-AGR-010\", \"MAT-MAM-012\"]);",
+                  "    pm.expect(codigos).to.not.include(\"MAT-CEM-001\");",
+                  "    pm.expect(codigos).to.not.include(\"MAT-ACE-003\");",
+                  "});",
+                  "pm.test(\"La arena tiene prioridad sobre el block\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    const pos = (c) => lista.findIndex((f) => f.codigo === c);",
+                  "    pm.expect(pos(\"MAT-AGR-010\")).to.be.below(pos(\"MAT-MAM-012\"));",
+                  "});",
+                  "pm.test(\"Cada fila trae PR, SS y cantidad sugerida\", () => {",
+                  "    const arena = pm.response.json().find((f) => f.codigo === \"MAT-AGR-010\");",
+                  "    pm.expect(arena.punto_reorden).to.eql(20);",
+                  "    pm.expect(arena.stock_seguridad).to.eql(8);",
+                  "    pm.expect(arena.cantidad_sugerida).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alertas abiertas en la tabla",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alertas?estado=abierta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "abierta"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Hay alertas abiertas, a lo sumo una por material\", () => {",
+                  "    const lista = pm.response.json();",
+                  "    pm.expect(lista).to.not.be.empty;",
+                  "    const ids = lista.map((a) => a.producto_id);",
+                  "    pm.expect(new Set(ids).size).to.eql(ids.length);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Posibles compras duplicadas (A3)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/posibles-duplicados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "posibles-duplicados"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"OC-1041 / OC-1042 es sospecha alta\", () => {",
+                  "    const s = pm.response.json().sospechas.find((x) => x.orden_original.numero === \"OC-1041\" && x.posible_duplicado.numero === \"OC-1042\");",
+                  "    pm.expect(s, \"par OC-1041/OC-1042\").to.exist;",
+                  "    pm.expect(s.nivel).to.eql(\"alta\");",
+                  "    pm.expect(s.monto_en_riesgo).to.eql(1290000);",
+                  "});",
+                  "pm.test(\"OC-1050 / OC-1053 es sospecha media (4 % de diferencia)\", () => {",
+                  "    const s = pm.response.json().sospechas.find((x) => x.orden_original.numero === \"OC-1050\");",
+                  "    pm.expect(s.nivel).to.eql(\"media\");",
+                  "    pm.expect(s.coincidencias[0].diferencia_cantidad_pct).to.eql(4);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicados con tolerancia 0 %",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordenes/posibles-duplicados?tolerancia=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordenes",
+                "posibles-duplicados"
+              ],
+              "query": [
+                {
+                  "key": "tolerancia",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Solo quedan duplicados de cantidad idéntica\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.regla.tolerancia).to.eql(0);",
+                  "    r.sospechas.forEach((s) => s.coincidencias.forEach((c) => pm.expect(c.diferencia_cantidad_pct).to.eql(0)));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Salida sin stock suficiente (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"salida\",\n  \"producto_id\": 4,\n  \"cantidad\": 999,\n  \"bodega_origen_id\": 2,\n  \"documento_numero\": \"VS-PM-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta JSON con formato de error\", () => {",
+                  "    pm.response.to.be.json;",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r).to.have.property(\"error\").that.is.a(\"string\").and.not.empty;",
+                  "    pm.expect(r).to.have.property(\"detalles\").that.is.an(\"array\");",
+                  "});",
+                  "pm.test(\"Dice cuánto hay\", () => pm.expect(pm.response.json().error).to.match(/Stock insuficiente/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traslado a la misma bodega (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"traslado\",\n  \"producto_id\": 1,\n  \"cantidad\": 1,\n  \"bodega_origen_id\": 1,\n  \"bodega_destino_id\": 1,\n  \"documento_numero\": \"BT-PM-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Señala el destino\", () => pm.expect(pm.response.json().detalles[0].campo).to.eql(\"bodega_destino_id\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ajuste sin motivo (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"ajuste\",\n  \"producto_id\": 1,\n  \"cantidad\": 1,\n  \"bodega_destino_id\": 1,\n  \"documento_numero\": \"AJ-PM-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Exige las observaciones\", () => pm.expect(pm.response.json().detalles.map((d) => d.campo)).to.include(\"observaciones\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrada sin orden de compra (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"entrada\",\n  \"producto_id\": 1,\n  \"cantidad\": 5,\n  \"bodega_destino_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Pide la orden de origen\", () => pm.expect(pm.response.json().detalles.map((d) => d.campo)).to.include(\"orden_id\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrada de más sobre una orden recibida (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"entrada\",\n  \"producto_id\": 1,\n  \"cantidad\": 1,\n  \"bodega_destino_id\": 1,\n  \"orden_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"No se recibe más de lo pedido\", () => pm.expect(pm.response.json().error).to.match(/solo faltan 0/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Salida válida de cemento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"salida\",\n  \"producto_id\": 1,\n  \"cantidad\": 2,\n  \"bodega_origen_id\": 1,\n  \"documento_numero\": \"VS-PM-002\",\n  \"observaciones\": \"Prueba de Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Registra usuario y documento, y recalcula el stock\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.movimiento.usuario.correo).to.eql(\"admin@empresa.co.cr\");",
+                  "    pm.expect(r.movimiento.documento_numero).to.eql(\"VS-PM-002\");",
+                  "    pm.expect(r.stock.stock).to.eql(188);",
+                  "    pm.collectionVariables.set(\"movimientoId\", r.movimiento.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener el movimiento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos/{{movimientoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos",
+                "{{movimientoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Sale de Bodega Central\", () => pm.expect(pm.response.json().bodega_origen.nombre).to.eql(\"Bodega Central\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Los movimientos no se editan (404)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos/{{movimientoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos",
+                "{{movimientoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ajuste que devuelve el stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"ajuste\",\n  \"producto_id\": 1,\n  \"cantidad\": 2,\n  \"bodega_destino_id\": 1,\n  \"documento_numero\": \"AJ-PM-002\",\n  \"observaciones\": \"Reverso de la prueba VS-PM-002\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"El stock vuelve a 190\", () => pm.expect(pm.response.json().stock.stock).to.eql(190));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Trazabilidad del cemento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/1/trazabilidad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "1",
+                "trazabilidad"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"El saldo final coincide con el stock\", () => pm.expect(pm.response.json().saldo_final).to.eql(190));",
+                  "pm.test(\"Cada entrada por compra dice de qué OC y proveedor viene\", () => {",
+                  "    const r = pm.response.json();",
+                  "    const compras = r.movimientos.filter((m) => m.documento.tipo === \"orden_compra\");",
+                  "    pm.expect(compras).to.not.be.empty;",
+                  "    compras.forEach((m) => {",
+                  "        pm.expect(m.origen_compra.orden).to.match(/^OC-/);",
+                  "        pm.expect(m.origen_compra.proveedor).to.be.a(\"string\");",
+                  "    });",
+                  "    pm.expect(r.entradas_por_orden.map((o) => o.orden)).to.include(\"OC-1041\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Digitar el punto de reorden (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/productos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"punto_reorden\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Explica que se calcula\", () => pm.expect(pm.response.json().detalles[0].mensaje).to.match(/se calculan/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Demanda máxima menor que la promedio (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/productos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"demanda_maxima\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Señala la demanda máxima\", () => pm.expect(pm.response.json().detalles[0].campo).to.eql(\"demanda_maxima\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revisión diaria automática (ejecución manual)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tareas/revision-diaria",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tareas",
+                "revision-diaria"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Resume materiales por reponer y duplicados abiertos\", () => {",
+                  "    const r = pm.response.json();",
+                  "    pm.expect(r.por_reponer.map((p) => p.codigo)).to.include(\"MAT-AGR-010\");",
+                  "    pm.expect(r.duplicados.sospechas.map((s) => s.posible_duplicado.numero)).to.include(\"OC-1042\");",
+                  "    pm.expect(r.resumen).to.match(/Revisión diaria/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Movimientos sin token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
                 ]
               }
             }

@@ -21,6 +21,10 @@ const TRAZOS = {
   categorias: ['m12 2 9 5-9 5-9-5 9-5Z', 'm3 12 9 5 9-5', 'm3 17 9 5 9-5'],
   bodegas: ['M3 21V9l9-6 9 6v12', 'M7 21v-8h10v8', 'M7 17h10'],
   existencias: ['M3 3v18h18', 'M7 15v3', 'M12 10v8', 'M17 6v12'],
+  movimientos: ['M7 4v16', 'm3 8 4-4 4 4', 'M17 20V4', 'm13 16 4 4 4-4'],
+  alerta: ['M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9', 'M10.3 21a1.9 1.9 0 0 0 3.4 0'],
+  trazabilidad: ['M5 3v18', 'M5 6h9l-2 3 2 3H5', 'M19 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z', 'M12 19h5'],
+  duplicados: ['M8 8h12v12H8z', 'M4 16V4h12'],
   departamentos: ['M4 21V4h10v17', 'M14 9h6v12', 'M8 8h2', 'M8 12h2', 'M8 16h2', 'M2 21h20'],
   empleados: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z', 'M4 21a8 8 0 0 1 16 0'],
 };

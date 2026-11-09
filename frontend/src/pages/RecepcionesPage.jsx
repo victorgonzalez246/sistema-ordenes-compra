@@ -1,9 +1,9 @@
 import PaginaCatalogo from '../components/PaginaCatalogo';
-import { formularioDe } from '../components/FormularioEntidad';
 import EstadoOrden from '../components/EstadoOrden';
+import RecepcionForm from '../components/RecepcionForm';
 import { recepcionesApi } from '../services/recursos';
-import { fuentes } from '../services/fuentes';
-import { fecha, hoyISO } from '../utils/formato';
+import { enlaceTrazabilidad } from '../services/inventario';
+import { entero, fecha } from '../utils/formato';
 import { metricas } from '../services/metricas';
 
 const columnas = [
@@ -18,29 +18,36 @@ const columnas = [
     ),
   },
   { clave: 'bodega', titulo: 'Bodega', render: (r) => r.bodega?.nombre },
+  {
+    clave: 'materiales',
+    titulo: 'Entró al inventario',
+    render: (r) =>
+      r.movimientos?.length ? (
+        r.movimientos.map((m) => (
+          <div key={m.id} className="sin-corte">
+            <a href={enlaceTrazabilidad(m.producto?.id)}>{entero(m.cantidad)} {m.producto?.unidad}</a>{' '}
+            <span className="texto-suave">{m.producto?.codigo}</span>
+          </div>
+        ))
+      ) : (
+        <span className="texto-suave">Sin entradas</span>
+      ),
+  },
   { clave: 'empleado', titulo: 'Recibió', render: (r) => r.empleado?.nombre },
   { clave: 'observaciones', titulo: 'Observaciones', render: (r) => r.observaciones || '—' },
 ];
-
-const Formulario = formularioDe([
-  { nombre: 'orden_id', etiqueta: 'Orden de compra', tipo: 'relacion', requerido: true, fuente: fuentes.ordenAprobada, ancho: 'completo', ayuda: 'Solo órdenes aprobadas o recibidas' },
-  { nombre: 'bodega_id', etiqueta: 'Bodega', tipo: 'relacion', requerido: true, fuente: fuentes.bodega },
-  { nombre: 'fecha', etiqueta: 'Fecha', tipo: 'fecha', requerido: true, defecto: hoyISO() },
-  { nombre: 'empleado_id', etiqueta: 'Recibido por', tipo: 'relacion', requerido: true, fuente: fuentes.empleado, ancho: 'completo' },
-  { nombre: 'observaciones', etiqueta: 'Observaciones', tipo: 'area', max: 255, ancho: 'completo' },
-]);
 
 export default function RecepcionesPage() {
   return (
     <PaginaCatalogo
       titulo="Recepciones"
-      descripcion="Mercancía que llega a las bodegas. Solo se registra para órdenes aprobadas o ya recibidas."
+      descripcion="Mercancía que llega a una bodega u obra. Lo recibido entra al inventario ligado a su orden de compra."
       singular="Recepción"
       femenino
       api={recepcionesApi}
       metricas={metricas.recepciones}
       columnas={columnas}
-      Formulario={Formulario}
+      Formulario={RecepcionForm}
       camposBusqueda={[(r) => r.orden?.numero, (r) => r.bodega?.nombre, (r) => r.empleado?.nombre, 'observaciones']}
       nombreDe={(r) => `recepción de ${r.orden?.numero} del ${fecha(r.fecha)}`}
     />

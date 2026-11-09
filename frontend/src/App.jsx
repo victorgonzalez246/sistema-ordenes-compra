@@ -24,6 +24,11 @@ import DepartamentosPage from './pages/DepartamentosPage';
 import EmpleadosPage from './pages/EmpleadosPage';
 import UsuariosPage from './pages/UsuariosPage';
 import AsistentePage from './pages/AsistentePage';
+import { TEXTO_ROL } from './components/PanelAprobacion';
+import MovimientosPage from './pages/MovimientosPage';
+import AlertasReordenPage from './pages/AlertasReordenPage';
+import TrazabilidadPage from './pages/TrazabilidadPage';
+import DuplicadosPage from './pages/DuplicadosPage';
 
 // Menú lateral agrupado por área
 const SECCIONES = [
@@ -42,6 +47,7 @@ const SECCIONES = [
       { ruta: '/requisiciones', titulo: 'Requisiciones', icono: 'requisiciones', Pagina: RequisicionesPage },
       { ruta: '/cotizaciones', titulo: 'Cotizaciones', icono: 'cotizaciones', Pagina: CotizacionesPage },
       { ruta: '/recepciones', titulo: 'Recepciones', icono: 'recepciones', Pagina: RecepcionesPage },
+      { ruta: '/duplicados', titulo: 'Posibles duplicados', icono: 'duplicados', Pagina: DuplicadosPage },
     ],
   },
   {
@@ -68,6 +74,9 @@ const SECCIONES = [
     icono: 'bodegas',
     rutas: [
       { ruta: '/bodegas', titulo: 'Bodegas', icono: 'bodegas', Pagina: BodegasPage },
+      { ruta: '/alertas-reorden', titulo: 'Alertas de reorden', icono: 'alerta', Pagina: AlertasReordenPage },
+      { ruta: '/movimientos', titulo: 'Movimientos', icono: 'movimientos', Pagina: MovimientosPage },
+      { ruta: '/trazabilidad', titulo: 'Trazabilidad', icono: 'trazabilidad', Pagina: TrazabilidadPage },
       { ruta: '/existencias', titulo: 'Existencias', icono: 'existencias', Pagina: ExistenciasPage },
     ],
   },
@@ -176,7 +185,8 @@ function Rutas() {
 }
 
 function Panel({ ruta }) {
-  const actual = RUTAS.find((r) => r.ruta === ruta) ?? RUTAS[0];
+  // La ruta puede traer parámetros (#/trazabilidad?producto=1): se comparan solo con la parte antes del "?"
+  const actual = RUTAS.find((r) => r.ruta === ruta.split('?')[0]) ?? RUTAS[0];
   const { Pagina } = actual;
   const { usuario, cerrarSesion } = useAuth();
   const [compacto, setCompacto] = useMenuCompacto();
@@ -252,7 +262,7 @@ function Panel({ ruta }) {
             <span className="usuario-avatar" aria-hidden="true">{iniciales(usuario?.nombre)}</span>
             <span className="usuario-datos nav-texto">
               <strong>{usuario?.nombre ?? 'Cargando…'}</strong>
-              <small>{usuario?.correo}</small>
+              <small title={usuario?.correo}>{TEXTO_ROL[usuario?.rol] ?? usuario?.correo}</small>
             </span>
             <button
               type="button"

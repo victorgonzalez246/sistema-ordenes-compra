@@ -37,17 +37,17 @@ const columnas = [
 ];
 
 const Formulario = formularioDe([
-  { nombre: 'producto_id', etiqueta: 'Producto', tipo: 'relacion', requerido: true, fuente: fuentes.producto, ancho: 'completo' },
-  { nombre: 'bodega_id', etiqueta: 'Bodega', tipo: 'relacion', requerido: true, fuente: fuentes.bodega, ancho: 'completo' },
-  { nombre: 'cantidad', etiqueta: 'Cantidad disponible', tipo: 'numero', requerido: true },
-  { nombre: 'minimo', etiqueta: 'Mínimo', tipo: 'numero', defecto: '0', ayuda: 'Por debajo de este valor hay que reponer' },
+  // La cantidad no se digita: sale de los movimientos de inventario
+  { nombre: 'producto_id', etiqueta: 'Producto', tipo: 'relacion', requerido: true, fuente: fuentes.producto, ancho: 'completo', soloCrear: true },
+  { nombre: 'bodega_id', etiqueta: 'Bodega', tipo: 'relacion', requerido: true, fuente: fuentes.bodega, ancho: 'completo', soloCrear: true },
+  { nombre: 'minimo', etiqueta: 'Mínimo en esta bodega', tipo: 'numero', defecto: '0', ayuda: 'Por debajo de este valor hay que reponer' },
 ]);
 
 export default function ExistenciasPage() {
   return (
     <PaginaCatalogo
       titulo="Existencias"
-      descripcion="Cantidad de cada producto por bodega. Un producto aparece una sola vez en cada bodega."
+      descripcion="Cantidad de cada producto por bodega u obra. La cantidad se calcula con los movimientos de inventario; aquí solo se define el mínimo de cada bodega."
       singular="Existencia"
       femenino
       api={existenciasApi}

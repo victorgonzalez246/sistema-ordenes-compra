@@ -23,6 +23,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nombre        VARCHAR(100)   NOT NULL,
   correo        VARCHAR(120)   NOT NULL,
   password      VARCHAR(72)    NOT NULL,
+  -- Rol en la matriz de aprobación de órdenes (lo asigna la Gerencia General)
+  rol           ENUM('solicitante','jefatura_area','jefatura_compras','gerencia_financiera','gerencia_general') NOT NULL DEFAULT 'solicitante',
+  departamento_id INT          NULL,
   fecha_creacion DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -134,6 +137,14 @@ CREATE TABLE IF NOT EXISTS productos (
   nombre        VARCHAR(150)   NOT NULL,
   unidad        VARCHAR(20)    NOT NULL,
   precio_ref    DECIMAL(12,2)  NULL,
+  -- Parámetros de inventario. El stock de seguridad y el punto de reorden NO se guardan:
+  -- SS = (demanda_maxima - demanda_promedio) * tiempo_entrega
+  -- PR = demanda_promedio * tiempo_entrega + SS
+  stock_minimo      INT            NULL,
+  stock_maximo      INT            NULL,
+  demanda_promedio  DECIMAL(12,2)  NULL,
+  demanda_maxima    DECIMAL(12,2)  NULL,
+  tiempo_entrega    INT            NULL COMMENT 'Días que tarda el proveedor en entregar',
   categoria_id  INT            NULL,
   created_at    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -164,6 +175,7 @@ CREATE TABLE IF NOT EXISTS bodegas (
 
 -- ============================================================
 -- 10. EXISTENCIAS (inventario por producto-bodega)
+-- Resumen: la cantidad la reescribe el sistema con el saldo de la tabla movimientos
 -- ============================================================
 CREATE TABLE IF NOT EXISTS existencias (
   id            INT            NOT NULL AUTO_INCREMENT,
@@ -238,6 +250,12 @@ CREATE TABLE IF NOT EXISTS ordenes_compra (
   total           DECIMAL(12,2)  NOT NULL DEFAULT 0.00,
   departamento_id INT            NOT NULL,
   proveedor_id    INT            NOT NULL,
+  -- Registro de la aprobación según la matriz (quién, cuándo, con qué monto y nivel)
+  aprobada_por_id INT            NULL,
+  aprobada_en     DATETIME       NULL,
+  monto_evaluado  DECIMAL(14,2)  NULL,
+  nivel_aprobacion VARCHAR(30)   NULL,
+  acta_comite     VARCHAR(40)    NULL,
   created_at      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -247,7 +265,10 @@ CREATE TABLE IF NOT EXISTS ordenes_compra (
     ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_ordenes_proveedor
     FOREIGN KEY (proveedor_id) REFERENCES proveedores(id)
-    ON DELETE RESTRICT ON UPDATE CASCADE
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_ordenes_aprobada_por
+    FOREIGN KEY (aprobada_por_id) REFERENCES usuarios(id)
+    ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 -- ============================================================
@@ -337,3 +358,85 @@ CREATE TABLE IF NOT EXISTS pagos (
     ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
+
+-- ============================================================
+-- 18. MOVIMIENTOS DE INVENTARIO (Quiz #2, opción 2)
+-- El stock de un material en una bodega = lo que entró (destino) - lo que salió (origen).
+-- No se editan ni se borran: un error se corrige con un ajuste.
+--   entrada:  solo destino     (orden de compra o inventario inicial)
+--   salida:   solo origen      (vale de salida)
+--   traslado: origen y destino (boleta de traslado)
+--   ajuste:   origen o destino (conteo físico)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS movimientos (
+  id                 INT            NOT NULL AUTO_INCREMENT,
+  tipo               ENUM('entrada','salida','traslado','ajuste') NOT NULL,
+  fecha              DATE           NOT NULL,
+  cantidad           INT            NOT NULL,
+  documento_tipo     ENUM('orden_compra','inventario_inicial','vale_salida','boleta_traslado','ajuste_inventario') NOT NULL,
+  documento_numero   VARCHAR(40)    NOT NULL,
+  observaciones      VARCHAR(255)   NULL,
+  producto_id        INT            NOT NULL,
+  bodega_origen_id   INT            NULL,
+  bodega_destino_id  INT            NULL,
+  usuario_id         INT            NOT NULL,
+  orden_id           INT            NULL,
+  recepcion_id       INT            NULL,
+  created_at         DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY ix_movimientos_producto_fecha (producto_id, fecha),
+  CONSTRAINT ck_movimientos_cantidad CHECK (cantidad > 0),
+  CONSTRAINT fk_movimientos_producto
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_movimientos_bodega_origen
+    FOREIGN KEY (bodega_origen_id) REFERENCES bodegas(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_movimientos_bodega_destino
+    FOREIGN KEY (bodega_destino_id) REFERENCES bodegas(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_movimientos_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_movimientos_orden
+    FOREIGN KEY (orden_id) REFERENCES ordenes_compra(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_movimientos_recepcion
+    FOREIGN KEY (recepcion_id) REFERENCES recepciones(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 19. ALERTAS DE REORDEN
+-- Se abren solas cuando un movimiento deja el stock total en o bajo el punto de reorden
+-- y se cierran solas cuando se recupera. A lo sumo una abierta por material.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS alertas_reorden (
+  id                 INT            NOT NULL AUTO_INCREMENT,
+  estado             ENUM('abierta','cerrada') NOT NULL DEFAULT 'abierta',
+  prioridad          ENUM('urgente','reponer') NOT NULL,
+  stock              INT            NOT NULL,
+  punto_reorden      DECIMAL(12,2)  NOT NULL,
+  cantidad_sugerida  INT            NOT NULL DEFAULT 0,
+  cerrada_en         DATETIME       NULL,
+  producto_id        INT            NOT NULL,
+  movimiento_id      INT            NULL,
+  created_at         DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at         DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_alertas_producto
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_alertas_movimiento
+    FOREIGN KEY (movimiento_id) REFERENCES movimientos(id)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 20. MATRIZ DE APROBACIÓN: departamento de cada usuario
+-- (se agrega al final porque departamentos se crea después de usuarios)
+-- ============================================================
+ALTER TABLE usuarios
+  ADD CONSTRAINT fk_usuarios_departamento
+    FOREIGN KEY (departamento_id) REFERENCES departamentos(id)
+    ON DELETE SET NULL ON UPDATE CASCADE;

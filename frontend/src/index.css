@@ -899,3 +899,61 @@ code { background: rgba(148, 170, 210, 0.12); color: #cfdcf0; }
 .md-tabla .derecha { white-space: nowrap; }
 .chat-asistente:has(.md-tabla) { max-width: 100%; }.asistente { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.2fr); }
 .md-tabla th, .md-tabla td { padding: 6px 8px; }
+/* ---------- Control de inventario (Quiz #2) ---------- */
+.estado-urgente { background: var(--peligro-claro); color: var(--peligro); border-color: rgba(220, 60, 60, 0.4); }
+.estado-reponer { background: var(--aviso-claro); color: var(--aviso); border-color: rgba(200, 150, 20, 0.4); }
+.estado-ok { background: var(--exito-claro); color: var(--exito); border-color: rgba(30, 140, 60, 0.35); }
+.estado-sin_parametros, .estado-cerrada { background: rgba(120, 130, 150, 0.14); color: var(--texto-suave); border-color: var(--borde); }
+.estado-abierta { background: var(--aviso-claro); color: var(--aviso); border-color: rgba(200, 150, 20, 0.4); }
+.tipo-entrada { background: var(--exito-claro); color: var(--exito); border-color: rgba(30, 140, 60, 0.35); }
+.tipo-salida { background: var(--peligro-claro); color: var(--peligro); border-color: rgba(220, 60, 60, 0.4); }
+.tipo-traslado { background: var(--primario-claro); color: var(--primario); border-color: var(--borde-fuerte); }
+.tipo-ajuste { background: var(--aviso-claro); color: var(--aviso); border-color: rgba(200, 150, 20, 0.4); }
+.positivo { color: var(--exito); font-weight: 600; }
+.negativo { color: var(--peligro); font-weight: 600; }
+
+.filtros-inventario { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.filtros-inventario .campo { min-width: 180px; flex: 1; }
+.filtros-inventario .campo-corto { min-width: 110px; flex: 0 1 140px; }
+
+.nota-stock { padding: 10px 12px; border-radius: 8px; background: var(--primario-claro); font-size: 13.5px; }
+.nota-stock strong { font-variant-numeric: tabular-nums; }
+
+.barra-reorden { position: relative; height: 10px; border-radius: 999px; background: rgba(120, 130, 150, 0.18); min-width: 120px; }
+.barra-reorden-relleno { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
+.barra-reorden-marca { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--texto); border-radius: 2px; }
+
+.sospechas { display: flex; flex-direction: column; gap: 14px; }
+.sospecha { padding: 16px 18px; }
+.sospecha-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.sospecha-ordenes { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+.sospecha-orden { border: 1px solid var(--borde); border-radius: 10px; padding: 10px 12px; }
+.sospecha-orden small { display: block; color: var(--texto-suave); }
+.sospecha-vs { color: var(--texto-suave); font-weight: 700; }
+.monto-riesgo { font-size: 18px; font-weight: 700; color: var(--peligro); font-variant-numeric: tabular-nums; }
+
+.resumen-texto { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; line-height: 1.55; margin: 0; padding: 14px; border-radius: 10px; background: rgba(120, 130, 150, 0.1); }
+
+.lineas-recepcion { width: 100%; border-collapse: collapse; font-size: 14px; }
+.lineas-recepcion th { text-align: left; font-size: 12px; color: var(--texto-suave); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--borde); }
+.lineas-recepcion td { padding: 6px 8px; border-bottom: 1px solid var(--borde); }
+.lineas-recepcion input { width: 110px; font: inherit; padding: 6px 8px; border: 1px solid var(--borde-fuerte); border-radius: 8px; background: transparent; color: inherit; }
+
+@media (max-width: 720px) {
+  .sospecha-ordenes { grid-template-columns: 1fr; }
+  .sospecha-vs { text-align: center; }
+}
+
+/* El tema oscuro redefine .filtro después de .filtro-activo; esta regla más específica
+   asegura que el filtro elegido siempre se distinga */
+.filtro.filtro-activo { background: var(--acento); border-color: transparent; color: #fff; }
+.celda-material { min-width: 190px; }
+
+/* ---------- Matriz de aprobación (Quiz #2, A1) ---------- */
+.panel-aprobacion { border: 1px solid var(--borde); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; background: rgba(120, 130, 150, 0.06); }
+.panel-aprobacion-cabecera { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.panel-aprobacion-cabecera > div { display: flex; flex-direction: column; }
+.panel-aprobacion-cabecera strong { font-size: 17px; }
+.alerta-aviso-suave { background: var(--aviso-claro); color: var(--texto); border: 1px solid rgba(200, 150, 20, 0.4); }
+.lista-requisitos { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.registro-aprobacion { margin: 8px 0 0; }

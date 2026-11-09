@@ -2,6 +2,7 @@ require('dotenv').config({ quiet: true });
 
 const app = require('./src/app');
 const { sequelize } = require('./src/models');
+const { iniciarTareas } = require('./src/services/tareas');
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,6 +16,7 @@ async function iniciar() {
 
     app.listen(PORT, () => {
       console.log(`Servidor escuchando en http://localhost:${PORT}/api`);
+      iniciarTareas();
     });
   } catch (error) {
     console.error('No se pudo iniciar el servidor:', error.message);

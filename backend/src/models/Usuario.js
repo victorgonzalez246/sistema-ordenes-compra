@@ -21,6 +21,12 @@ const Usuario = sequelize.define(
       type: DataTypes.STRING(72),
       allowNull: false,
     },
+    // Rol para la matriz de aprobación de órdenes (services/aprobacion.js)
+    rol: {
+      type: DataTypes.ENUM('solicitante', 'jefatura_area', 'jefatura_compras', 'gerencia_financiera', 'gerencia_general'),
+      allowNull: false,
+      defaultValue: 'solicitante',
+    },
   },
   {
     tableName: 'usuarios',

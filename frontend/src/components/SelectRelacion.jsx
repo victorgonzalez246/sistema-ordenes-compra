@@ -5,13 +5,13 @@ import { useListado } from '../hooks/useListado';
  * fuente: { api, texto: (registro) => string, filtro?: (registro) => boolean }
  * El valor actual se muestra aunque el filtro lo excluya (por ejemplo, un proveedor ya inactivo).
  */
-export default function SelectRelacion({ fuente, valorActual, ...props }) {
+export default function SelectRelacion({ fuente, valorActual, opcionVacia = '— Selecciona —', ...props }) {
   const { datos, cargando, error } = useListado(fuente.api.listar);
   const opciones = datos.filter(
     (r) => !fuente.filtro || fuente.filtro(r) || String(r.id) === String(valorActual)
   );
 
-  let textoVacio = '— Selecciona —';
+  let textoVacio = opcionVacia;
   if (cargando && !datos.length) textoVacio = 'Cargando…';
   if (error) textoVacio = 'No se pudo cargar la lista';
 

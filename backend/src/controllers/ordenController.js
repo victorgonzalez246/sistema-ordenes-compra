@@ -8,8 +8,11 @@ const {
   Producto,
   Factura,
   Recepcion,
+  Usuario,
 } = require('../models');
 const { HttpError } = require('../middlewares/errorHandler');
+const { evaluarOrden } = require('../services/aprobacionDatos');
+const { colones } = require('./reglas');
 const { datosValidados } = require('../validators/comunes');
 
 // Cambios de estado permitidos: recibida y anulada son estados finales
@@ -23,6 +26,7 @@ const TRANSICIONES = {
 const incluirCabecera = [
   { model: Departamento, as: 'departamento', attributes: ['id', 'nombre', 'centro_costo'] },
   { model: Proveedor, as: 'proveedor', attributes: ['id', 'razon_social', 'cedula_juridica'] },
+  { model: Usuario, as: 'aprobada_por', attributes: ['id', 'nombre', 'rol'] },
 ];
 
 const incluirCompleto = [
@@ -135,11 +139,12 @@ async function crear(req, res) {
 
 // PUT /api/ordenes/:id
 async function actualizar(req, res) {
-  const { detalles, estado, ...cabecera } = datosValidados(req);
+  const { detalles, estado, acta_comite: actaComite, ...cabecera } = datosValidados(req);
 
   await sequelize.transaction(async (transaction) => {
     const orden = await OrdenCompra.findByPk(req.params.id, { transaction });
     if (!orden) throw new HttpError(404, `No existe una orden de compra con id ${req.params.id}`);
+    const estadoAnterior = orden.estado;
 
     const editaContenido = detalles !== undefined || Object.keys(cabecera).length > 0;
     if (editaContenido && orden.estado !== 'pendiente') {
@@ -176,9 +181,40 @@ async function actualizar(req, res) {
     }
 
     await orden.update(cambios, { transaction });
+
+    // Aprobar: la matriz de aprobación decide quién puede y con qué requisitos
+    if (estado === 'aprobada' && estadoAnterior !== 'aprobada') {
+      const { evaluacion } = await evaluarOrden(orden.id, { usuario: req.usuario, actaComite, transaction });
+      if (!evaluacion.usuario.puede_aprobar) {
+        throw new HttpError(403, evaluacion.usuario.motivo, [
+          { campo: 'estado', mensaje: `Monto evaluado ${colones(evaluacion.monto_evaluado)}: aprueba ${evaluacion.requerido.aprueba}` },
+        ]);
+      }
+      if (evaluacion.bloqueos.length) {
+        throw new HttpError(409, 'La orden no cumple los requisitos de la matriz de aprobación', evaluacion.bloqueos);
+      }
+      await orden.update(
+        {
+          aprobada_por_id: req.usuario.id,
+          aprobada_en: new Date(),
+          monto_evaluado: evaluacion.monto_evaluado,
+          nivel_aprobacion: evaluacion.requerido.rol,
+          acta_comite: actaComite ?? null,
+        },
+        { transaction }
+      );
+    }
   });
 
   res.json(await cargarOrden(req.params.id));
+}
+
+// GET /api/ordenes/:id/aprobacion: qué pide la matriz para esta orden y si el usuario actual puede aprobarla
+async function aprobacion(req, res) {
+  const resultado = await evaluarOrden(req.params.id, { usuario: req.usuario, actaComite: req.query.acta_comite });
+  if (!resultado) throw new HttpError(404, `No existe una orden de compra con id ${req.params.id}`);
+  const { orden, evaluacion, ventana_dias } = resultado;
+  res.json({ orden: { id: orden.id, numero: orden.numero, estado: orden.estado }, ventana_dias, ...evaluacion });
 }
 
 // DELETE /api/ordenes/:id (sus líneas se borran en cascada)
@@ -208,4 +244,4 @@ async function eliminar(req, res) {
   res.status(204).end();
 }
 
-module.exports = { listar, obtener, crear, actualizar, eliminar };
+module.exports = { listar, obtener, crear, actualizar, eliminar, aprobacion };

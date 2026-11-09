@@ -9,6 +9,15 @@ Sistema para centralizar el ciclo de compras de una empresa: requisiciones, coti
 
 ![Pantalla de órdenes de compra](docs/evidencias/pantalla-ordenes.png)
 
+> **Quiz #2 · Opción 2: control de inventario para construcción.** Esta rama agrega:
+> - movimientos de inventario (el stock se calcula a partir de ellos),
+> - punto de reorden calculado y alertas automáticas,
+> - detección de compras duplicadas,
+> - trazabilidad por orden de compra,
+> - una revisión diaria programada en el back end.
+>
+> Los datos de ejemplo son los de Constructora Del Valle S.A. Detalle completo en [docs/QUIZ2_Control_Inventario.md](docs/QUIZ2_Control_Inventario.md).
+
 ## Funcionalidades
 
 - **Resumen (dashboard):** gasto comprometido frente al presupuesto, 6 indicadores (cuentas por pagar, órdenes por aprobar, requisiciones, productos bajo el mínimo, pagos del mes, proveedores activos), gráficos de gasto por departamento, órdenes por estado, vencimientos de facturas, pagos por mes y compras por proveedor (con tooltip y vista en tabla), y listas de alertas.
@@ -289,18 +298,33 @@ Todas las respuestas de error tienen la misma forma:
 
 ## Pruebas
 
-### Pruebas automáticas del asistente
+### Pruebas automáticas
 
 ```bash
 cd backend
 npm test
 ```
 
-8 pruebas del cerebro y los agentes con un cliente simulado: no llaman a la API de Anthropic, no necesitan clave y no gastan dinero. Sí leen MySQL, así que requieren la base encendida y el seed cargado. Verifican la delegación en paralelo, que cada agente reciba solo sus herramientas, el cálculo del consumo, que la base de datos no cambie, el manejo de errores y rechazos del modelo, el tope de pasos y el límite de uso.
+45 pruebas en total:
+- **25 del control de inventario** (`test/inventario.test.js`): punto de reorden y prioridades con los datos de A5, duplicados con los de A3, forma de los movimientos y revisión diaria.
+- **12 de la matriz de aprobación** (`test/aprobacion.test.js`): umbrales, roles, fraccionamiento, cotizaciones y acta de comité.
+
+Estas 37 no necesitan base de datos.
+
+- **8 del asistente**, con un cliente simulado: no llaman a la API de Anthropic, no necesitan clave y no gastan dinero. Sí leen MySQL, así que requieren la base encendida y el seed cargado. Verifican la delegación en paralelo, que cada agente reciba solo sus herramientas, el cálculo del consumo, que la base de datos no cambie, el manejo de errores y rechazos del modelo, el tope de pasos y el límite de uso.
 
 ### Colección de Postman
 
-La colección `postman/ordenes-compra.postman_collection.json` cubre la autenticación (registro, login, perfil y los casos 401), los 16 CRUDs (incluido Usuarios), las reglas de negocio y los casos de error. La carpeta **Autenticación** va primero: registra un usuario nuevo, inicia sesión y guarda el token, que el resto de la colección usa automáticamente. Las pruebas crean sus propios registros y los eliminan al final, así que se pueden repetir. Con la API levantada y el seed recién cargado:
+La colección `postman/ordenes-compra.postman_collection.json` cubre:
+- la autenticación: registro, login, perfil y los casos 401;
+- los 16 CRUDs, incluido Usuarios;
+- las reglas de negocio y los casos de error;
+- la matriz de aprobación: 403 por rol, 409 por cotizaciones y fraccionamiento OC-1070 + OC-1061;
+- la carpeta **Inventario**: stock, reorden, duplicados, movimientos, trazabilidad y revisión diaria.
+
+La carpeta **Autenticación** va primero. Registra un usuario nuevo, que entra como *solicitante*; con su token se prueba lo que no puede hacer. Después inicia sesión con la cuenta de Gerencia General del seed, cuyo token usa el resto de la colección.
+
+Las pruebas crean sus propios registros y los eliminan al final. Los movimientos de inventario no se borran: las pruebas que mueven stock lo devuelven con un ajuste. Por eso la colección se puede repetir. Con la API levantada y el seed recién cargado:
 
 ```bash
 postman collection run postman/ordenes-compra.postman_collection.json
@@ -308,11 +332,9 @@ postman collection run postman/ordenes-compra.postman_collection.json
 
 También puede importarse en la aplicación de Postman. La variable `baseUrl` apunta a `http://localhost:3000/api`.
 
-Resultado de la última ejecución (204 peticiones, 480 aserciones, 0 fallos):
+Resultado de la última ejecución: **233 peticiones, 550 aserciones, 0 fallos**. Una segunda corrida seguida tampoco tuvo fallos. La salida completa en texto está en [`docs/evidencias/pruebas-postman.txt`](docs/evidencias/pruebas-postman.txt). Esa ejecución se hizo contra una copia de prueba de la API en el puerto 3999, con `--env-var baseUrl=http://localhost:3999/api`.
 
-![Resultado de las pruebas con Postman CLI](docs/evidencias/pruebas-postman.png)
-
-La salida completa en texto está en [`docs/evidencias/pruebas-postman.txt`](docs/evidencias/pruebas-postman.txt).
+La captura [`docs/evidencias/pruebas-postman.png`](docs/evidencias/pruebas-postman.png) es de la versión anterior del proyecto (204 peticiones).
 
 ## Capturas
 

@@ -1,7 +1,8 @@
 const { body } = require('express-validator');
-const { idParam, soloCampos, alMenosUnCampo, texto } = require('./comunes');
+const { idParam, soloCampos, alMenosUnCampo, texto, referencia } = require('./comunes');
+const { ROLES } = require('../services/aprobacion');
 
-const CAMPOS = ['nombre', 'correo', 'password'];
+const CAMPOS = ['nombre', 'correo', 'password', 'rol', 'departamento_id'];
 
 function reglas({ opcional }) {
   const regla = (campo) => (opcional ? body(campo).optional() : body(campo));
@@ -20,6 +21,9 @@ function reglas({ opcional }) {
       .isString().withMessage('La contraseña debe ser texto').bail()
       .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres').bail()
       .isLength({ max: 72 }).withMessage('La contraseña admite máximo 72 caracteres'),
+    // Rol de la matriz de aprobación y departamento (solo los asigna la Gerencia General)
+    body('rol').optional().isIn(Object.keys(ROLES)).withMessage(`El rol debe ser uno de: ${Object.keys(ROLES).join(', ')}`),
+    referencia('departamento_id', 'El departamento', { nulo: true }),
   ];
 }
 

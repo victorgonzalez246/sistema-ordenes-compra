@@ -1,5 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const { parametrosReorden } = require('../services/reorden');
+
+const noNegativo = (etiqueta) => ({ args: [0], msg: `${etiqueta} no puede ser negativo(a)` });
 
 const Producto = sequelize.define(
   'Producto',
@@ -25,6 +28,40 @@ const Producto = sequelize.define(
       type: DataTypes.DECIMAL(12, 2),
       allowNull: true,
       validate: { min: { args: [0], msg: 'El precio de referencia no puede ser negativo' } },
+    },
+
+    // Parámetros de inventario (el punto de reorden se calcula con ellos, no se digita)
+    stock_minimo: { type: DataTypes.INTEGER, allowNull: true, validate: { min: noNegativo('El stock mínimo') } },
+    stock_maximo: { type: DataTypes.INTEGER, allowNull: true, validate: { min: noNegativo('El stock máximo') } },
+    demanda_promedio: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+      validate: { min: noNegativo('La demanda promedio') },
+    },
+    demanda_maxima: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+      validate: { min: noNegativo('La demanda máxima') },
+    },
+    tiempo_entrega: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: 'Días que tarda el proveedor en entregar',
+      validate: { min: noNegativo('El tiempo de entrega') },
+    },
+
+    // Campos calculados: aparecen en las respuestas pero no se guardan
+    stock_seguridad: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return parametrosReorden(this.dataValues).stock_seguridad;
+      },
+    },
+    punto_reorden: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return parametrosReorden(this.dataValues).punto_reorden;
+      },
     },
   },
   { tableName: 'productos' }

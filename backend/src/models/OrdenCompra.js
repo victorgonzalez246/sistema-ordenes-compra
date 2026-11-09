@@ -32,6 +32,12 @@ const OrdenCompra = sequelize.define(
       defaultValue: 0,
       validate: { min: { args: [0], msg: 'El total no puede ser negativo' } },
     },
+
+    // Registro de la aprobación según la matriz (quién, cuándo, con qué monto y nivel)
+    aprobada_en: { type: DataTypes.DATE, allowNull: true },
+    monto_evaluado: { type: DataTypes.DECIMAL(14, 2), allowNull: true },
+    nivel_aprobacion: { type: DataTypes.STRING(30), allowNull: true },
+    acta_comite: { type: DataTypes.STRING(40), allowNull: true },
   },
   { tableName: 'ordenes_compra' }
 );
